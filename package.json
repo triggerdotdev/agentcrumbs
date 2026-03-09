@@ -39,9 +39,7 @@
     "dev": "tsc --watch",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "changeset": "changeset",
-    "version": "changeset version",
-    "release": "pnpm build && changeset publish"
+    "changeset": "changeset"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
