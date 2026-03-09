@@ -1,0 +1,44 @@
+---
+title: "child()"
+description: "Create child trails with inherited context"
+---
+
+## `crumb.child(context)`
+
+Create a child trail with inherited context data. Context is merged and propagated through all crumbs.
+
+```typescript
+import { trail } from "agentcrumbs"; // @crumbs
+const crumb = trail("api-gateway"); // @crumbs
+
+function handleRequest(req: Request) {
+  const reqCrumb = crumb.child({ requestId: req.id, userId: user.id }); // @crumbs
+  reqCrumb("handling request", { path: req.path }); // @crumbs
+  // crumb output includes ctx: { requestId: "abc", userId: "123" }
+}
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `context` | `Record<string, unknown>` | Context data to merge into all crumbs from this child |
+
+### Return value
+
+Returns a new trail function with the same API. All crumbs emitted include the merged context.
+
+### Nesting children
+
+Children can have children. Context merges at each level:
+
+```typescript
+const reqCrumb = crumb.child({ requestId: "abc" }); // @crumbs
+const dbCrumb = reqCrumb.child({ database: "primary" }); // @crumbs
+dbCrumb("running query"); // @crumbs
+// ctx: { requestId: "abc", database: "primary" }
+```
+
+### When disabled
+
+`child()` returns the same frozen noop object. No allocation occurs.

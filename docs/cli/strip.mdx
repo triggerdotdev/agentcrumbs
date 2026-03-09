@@ -1,0 +1,69 @@
+---
+title: "strip"
+description: "Remove crumb markers from source files"
+---
+
+## `agentcrumbs strip`
+
+Remove all `// @crumbs` lines and `#region @crumbs` blocks from source files. Run this before merging PRs.
+
+```bash
+agentcrumbs strip
+```
+
+### Options
+
+| Flag | Description |
+| --- | --- |
+| `--dry-run` | Preview without modifying files |
+| `--check` | CI mode. Exits 1 if markers are found. |
+| `--dir <path>` | Custom directory (default: current directory) |
+| `--ext <extensions>` | File extensions to scan (comma-separated) |
+
+Default scans `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.mts` files. Skips `node_modules`, `dist`, `.git`.
+
+### What gets removed
+
+**Single-line markers**: any line ending with `// @crumbs` or `/* @crumbs */`:
+
+```typescript
+import { trail } from "agentcrumbs"; // @crumbs  // ← this entire line
+const crumb = trail("my-service"); // @crumbs     // ← this entire line
+crumb("checkpoint"); // @crumbs                    // ← this entire line
+```
+
+**Block markers**: everything between `#region @crumbs` and `#endregion @crumbs`:
+
+```typescript
+// #region @crumbs    // ← removed
+const session = crumb.session("debug");
+session.crumb("step 1");
+session.end();
+// #endregion @crumbs  // ← removed (entire block)
+```
+
+### Examples
+
+```bash
+# Preview what would be removed
+agentcrumbs strip --dry-run
+
+# Remove all crumb markers
+agentcrumbs strip
+
+# CI check (fails if markers found)
+agentcrumbs strip --check
+
+# Custom scope
+agentcrumbs strip --dir src/ --ext ts,tsx,js
+```
+
+### CI integration
+
+Add to your CI pipeline to prevent crumbs from reaching main:
+
+```yaml
+# GitHub Actions
+- name: Check for crumb markers
+  run: npx agentcrumbs strip --check
+```

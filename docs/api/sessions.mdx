@@ -1,0 +1,67 @@
+---
+title: "Sessions"
+description: "Group crumbs into logical sessions for replay and filtering"
+---
+
+## `crumb.session(name)` / `crumb.session(name, fn)`
+
+Group crumbs into logical sessions for later replay and filtering.
+
+### Manual session
+
+```typescript
+// #region @crumbs
+const session = crumb.session("investigating-timeout");
+session.crumb("checking connection pool", { active: 5, idle: 0 });
+session.crumb("found stale connection", { age: "45s" }, { tags: ["root-cause"] });
+session.end();
+// #endregion @crumbs
+```
+
+### Scoped session (auto-ends)
+
+```typescript
+// #region @crumbs
+await crumb.session("user-signup", async (s) => {
+  s.crumb("validating email");
+  s.crumb("creating account", { email });
+});
+// #endregion @crumbs
+```
+
+### Parameters
+
+**`session(name)`** returns a session object
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Session name (for display and filtering) |
+
+**`session(name, fn)`** scoped session
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Session name |
+| `fn` | `(session) => T` | Function to execute within the session |
+
+### Session object
+
+| Property/Method | Description |
+| --- | --- |
+| `session.crumb(msg, data?, options?)` | Drop a crumb tagged with this session |
+| `session.end()` | End the session |
+
+### Tags
+
+Add tags to any crumb for filtering:
+
+```typescript
+crumb("cache miss", { key }, { tags: ["perf", "cache"] }); // @crumbs
+```
+
+Tags can be filtered with the CLI:
+
+```bash
+agentcrumbs tail --tag perf
+agentcrumbs query --since 1h --tag root-cause
+```

@@ -1,0 +1,66 @@
+---
+title: "collect"
+description: "Start the HTTP collector server"
+---
+
+## `agentcrumbs collect`
+
+The collector is an HTTP server that receives crumbs via `POST /crumb` and writes them to a JSONL file. Without it running, crumbs fall back to stderr only and can't be queried later.
+
+```bash
+agentcrumbs collect
+# agentcrumbs collector
+#   http:  http://localhost:8374/crumb
+#   store: ~/.agentcrumbs/crumbs.jsonl
+#   press ctrl+c to stop
+```
+
+### Agent workflow
+
+When an agent needs to debug something, it should start the collector itself:
+
+```bash
+# Start collector in background
+agentcrumbs collect --quiet &
+
+# Run the service with crumbs enabled
+AGENTCRUMBS=1 node app.js
+
+# ... reproduce the issue ...
+
+# Query the trail
+agentcrumbs query --since 5m
+```
+
+The agent owns the collector lifecycle. Start it before debugging, query the results, stop it when done. The `--quiet` flag keeps it from cluttering stdout.
+
+### Options
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--port` | `8374` | HTTP port |
+| `--dir` | `~/.agentcrumbs` | Storage directory |
+| `--quiet` | `false` | No stdout output, just collects |
+
+### Examples
+
+```bash
+# Custom port and storage
+agentcrumbs collect --port 9999 --dir /var/log/crumbs
+
+# Quiet mode
+agentcrumbs collect --quiet
+```
+
+### How it works
+
+1. Listens on the specified port for `POST /crumb` requests
+2. Validates the JSON body matches the crumb schema
+3. Appends each crumb as a line to `crumbs.jsonl`
+4. The `tail` and `query` commands read from this file
+
+### Without the collector
+
+If the collector isn't running, crumbs still print to stderr (via ConsoleSink). You can read them in the terminal output, but `tail`, `query`, and `replay` won't work because nothing is writing to the JSONL file.
+
+For single-service debugging where you just want to see crumbs in the console, you don't need the collector. For multi-service setups or querying historical crumbs, start it first.

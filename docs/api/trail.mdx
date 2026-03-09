@@ -1,0 +1,90 @@
+---
+title: "trail()"
+description: "Create a trail function for a namespace"
+---
+
+## `trail(namespace)`
+
+Create a trail function for a namespace. Returns a frozen noop if the namespace is disabled.
+
+```typescript
+import { trail } from "agentcrumbs"; // @crumbs
+const crumb = trail("my-service"); // @crumbs
+```
+
+The returned `crumb` function is the primary API. Call it to drop a crumb:
+
+```typescript
+crumb("user authenticated", { userId: "123", method: "oauth" }); // @crumbs
+crumb("cache miss", { key: "users:123" }, { tags: ["perf", "cache"] }); // @crumbs
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `namespace` | `string` | Namespace for this trail. Used for filtering and display. |
+
+### Return value
+
+Returns a `TrailFn`, a callable function with additional methods:
+
+| Property/Method | Description |
+| --- | --- |
+| `crumb(msg, data?, options?)` | Drop a crumb (the function itself) |
+| `crumb.enabled` | `boolean`. Whether this trail is active. |
+| `crumb.scope(name, fn)` | Wrap a function with enter/exit tracking |
+| `crumb.child(context)` | Create a child trail with inherited context |
+| `crumb.wrap(name, fn)` | Wrap any function with scope tracking |
+| `crumb.time(label)` | Start a timer |
+| `crumb.timeEnd(label, data?)` | End a timer |
+| `crumb.snapshot(label, obj)` | Capture a point-in-time snapshot |
+| `crumb.assert(condition, msg)` | Debug-only assertion |
+| `crumb.session(name)` | Start a session |
+
+### The noop guarantee
+
+When a namespace is disabled, `trail()` returns a pre-built frozen noop function. There is no `if (enabled)` check on every call. The function itself IS the noop.
+
+```typescript
+// When AGENTCRUMBS is unset:
+const crumb = trail("my-service");  // returns frozen NOOP
+crumb("msg", { data });              // empty function, returns undefined
+crumb.scope("op", fn);               // calls fn() directly
+crumb.child({ rid: "x" });           // returns same frozen NOOP
+crumb.wrap("fetch", fetch);          // returns the original fetch
+```
+
+### Best practices
+
+Create trails at module level, not inside functions:
+
+```typescript
+// Good: created once
+import { trail } from "agentcrumbs"; // @crumbs
+const crumb = trail("api"); // @crumbs
+
+function handleRequest(req: Request) {
+  crumb("handling", { path: req.url }); // @crumbs
+}
+```
+
+```typescript
+// Bad: re-created on every call
+function handleRequest(req: Request) {
+  const crumb = trail("api"); // parses env var every time
+  crumb("handling", { path: req.url });
+}
+```
+
+### Guarding expensive arguments
+
+The only overhead when disabled is argument evaluation. For hot paths with expensive arguments:
+
+```typescript
+// #region @crumbs
+if (crumb.enabled) {
+  crumb("full dump", { state: structuredClone(everything) });
+}
+// #endregion @crumbs
+```

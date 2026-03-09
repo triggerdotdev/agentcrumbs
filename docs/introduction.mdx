@@ -1,0 +1,90 @@
+---
+title: "Introduction"
+description: "Structured debug tracing that agents drop inline while writing code"
+---
+
+# agentcrumbs
+
+AI agents can read your code but they can't see what happened at runtime. A function might look correct and still fail because of unexpected input, ordering, or side effects. So the agent guesses. And often guesses wrong.
+
+agentcrumbs gives agents a way to trace execution as they write code. The agent drops structured crumbs at every decision point, API call, and branch. When something breaks, it queries those crumbs and sees exactly what ran, with what data, in what order.
+
+Crumbs are development-only. They get stripped before merge and cost nothing when disabled.
+
+```
+Service A ──┐                                ┌── $ agentcrumbs tail
+Service B ──┤── fetch() ──> Collector :8374 ──┤── $ agentcrumbs query --since 5m
+Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/crumbs.jsonl
+```
+
+## Why agents need this
+
+**Agents can read code but not runtime state.** A function might look correct but fail because of unexpected input, ordering, or side effects. Crumbs capture what actually happened.
+
+**console.log is not enough.** Agents need structured, queryable data. Not a wall of text. Crumbs have namespaces, timestamps, structured data, and tags.
+
+**Bugs cross service boundaries.** The bug is in service A but the cause is in service B. Crumbs from both flow to the same collector.
+
+## Key properties
+
+- **Zero overhead when off.** `trail()` returns a frozen empty function. No conditionals, no property lookups. The function body is literally empty.
+- **Strip before merge.** `agentcrumbs strip` removes all `// @crumbs` lines and `#region @crumbs` blocks. Clean diffs, no debug code on main.
+- **HTTP collector.** `agentcrumbs collect` receives crumbs from all services via fire-and-forget HTTP. Tail, query, and replay from the CLI.
+- **Works with any agent.** Claude Code, Cursor, Copilot, Aider, custom agents. If the agent can write code, it can write crumbs.
+- **Ships with agent skills.** Built on [@tanstack/intent](https://tanstack.com/blog/from-docs-to-agents). Install the package, run `npx @tanstack/intent install`, and the agent learns how to use crumbs from the package itself. No stale training data.
+
+## Install
+
+```bash
+npm install agentcrumbs
+npx @tanstack/intent install
+```
+
+Then tell your agent: **"Run the agentcrumbs/init skill."**
+
+This is the critical step. The [init skill](/skills#the-init-skill) scans your repo, discovers services and modules, and builds a namespace catalog that gets written to your agent config (CLAUDE.md, .cursorrules, etc.). Without the catalog, every agent invents its own namespace names. With it, every agent, every session, same names.
+
+See the [quickstart](/quickstart) for the full setup.
+
+## How it works
+
+The agent writes crumbs as part of the code it's implementing:
+
+```typescript
+import { trail } from "agentcrumbs"; // @crumbs
+const crumb = trail("auth-service"); // @crumbs
+
+export async function handleLogin(token: string) {
+  crumb("login attempt", { tokenPrefix: token.slice(0, 8) }); // @crumbs
+
+  const user = await validateToken(token);
+
+  crumb("login success", { userId: user.id }); // @crumbs
+  return user;
+}
+```
+
+When something goes wrong, the agent queries the trail:
+
+```bash
+$ agentcrumbs query --since 5m --ns auth-service
+
+auth-service  login attempt       +0ms  { tokenPrefix: "eyJhbGci" }
+auth-service  token decode ok     +3ms  { userId: "u_8f3k" }
+auth-service  permissions check   +8ms  { roles: [] }
+auth-service  rejected: no roles  +8ms  { status: 401 }
+```
+
+Now the agent knows: the token is valid, but the user has no roles. The fix is in role assignment, not token validation.
+
+Enable with an environment variable:
+
+```bash
+AGENTCRUMBS=1 node your-app.js
+```
+
+Strip before merge:
+
+```bash
+agentcrumbs strip
+```

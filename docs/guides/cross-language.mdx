@@ -1,0 +1,119 @@
+---
+title: "Cross-language support"
+description: "Use agentcrumbs from any language via HTTP"
+---
+
+The collector and CLI are language-agnostic. Any language with HTTP support can send crumbs.
+
+## Protocol
+
+Send a `POST` request to `http://localhost:8374/crumb` with a JSON body matching the [crumb format](/crumb-format).
+
+### Required fields
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `ts` | `string` | ISO 8601 timestamp |
+| `ns` | `string` | Namespace |
+| `msg` | `string` | Message |
+| `type` | `string` | Crumb type (usually `"crumb"`) |
+| `dt` | `number` | Delta time in ms (use `0` if unknown) |
+| `pid` | `number` | Process ID |
+
+### Optional fields
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `data` | `unknown` | Structured data |
+| `ctx` | `object` | Context data |
+| `tags` | `string[]` | Tags for filtering |
+| `sid` | `string` | Session ID |
+| `traceId` | `string` | Trace ID |
+| `depth` | `number` | Nesting depth |
+
+## Examples
+
+### curl
+
+```bash
+curl -X POST http://localhost:8374/crumb \
+  -H "Content-Type: application/json" \
+  -d '{"ts":"2026-01-01T00:00:00Z","ns":"shell","msg":"hello","type":"crumb","dt":0,"pid":1}'
+```
+
+### Python
+
+```python
+import requests, os, json
+from datetime import datetime
+
+def crumb(ns, msg, data=None):
+    try:
+        requests.post("http://localhost:8374/crumb", json={
+            "ts": datetime.utcnow().isoformat() + "Z",
+            "ns": ns,
+            "msg": msg,
+            "type": "crumb",
+            "dt": 0,
+            "pid": os.getpid(),
+            "data": data
+        }, timeout=0.1)
+    except:
+        pass
+
+crumb("python-service", "processing started", {"items": 42})
+```
+
+### Go
+
+```go
+func crumb(ns, msg string, data any) {
+    body, _ := json.Marshal(map[string]any{
+        "ts":   time.Now().UTC().Format(time.RFC3339Nano),
+        "ns":   ns,
+        "msg":  msg,
+        "type": "crumb",
+        "dt":   0,
+        "pid":  os.Getpid(),
+        "data": data,
+    })
+    go http.Post("http://localhost:8374/crumb", "application/json", bytes.NewReader(body))
+}
+```
+
+### Rust
+
+```rust
+fn crumb(ns: &str, msg: &str) {
+    let body = serde_json::json!({
+        "ts": chrono::Utc::now().to_rfc3339(),
+        "ns": ns,
+        "msg": msg,
+        "type": "crumb",
+        "dt": 0,
+        "pid": std::process::id()
+    });
+    // fire and forget
+    tokio::spawn(async move {
+        let _ = reqwest::Client::new()
+            .post("http://localhost:8374/crumb")
+            .json(&body)
+            .send()
+            .await;
+    });
+}
+```
+
+## Session integration
+
+To integrate with CLI-initiated sessions, read the session ID from `/tmp/agentcrumbs.session` and include it as the `sid` field in your crumbs.
+
+## Runtime requirements
+
+The TypeScript package includes the canonical collector and CLI. Install it globally or use `npx`:
+
+```bash
+npm install -g agentcrumbs
+# or
+npx agentcrumbs collect
+```

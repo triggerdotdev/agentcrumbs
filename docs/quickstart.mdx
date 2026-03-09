@@ -1,0 +1,113 @@
+---
+title: "Quickstart"
+description: "Install agentcrumbs and set up your agent in 2 minutes"
+---
+
+## Install
+
+```bash
+npm install agentcrumbs
+```
+
+## Wire the skills
+
+```bash
+npx @tanstack/intent install
+```
+
+This pulls agentcrumbs' [@tanstack/intent](https://tanstack.com/blog/from-docs-to-agents) skills into your agent config (CLAUDE.md, .cursorrules, etc.).
+
+## Run the init skill
+
+This is the most important step. Tell your agent:
+
+> "Run the agentcrumbs/init skill to set up debug tracing in this project."
+
+The agent scans your repo, discovers services and modules, and proposes a **namespace catalog**: a table of every service name and what it maps to. You confirm or adjust, and the agent writes it to your config file.
+
+Why this matters: without the catalog, every agent invents its own names. One session uses `auth`, another uses `auth-service`, another uses `authentication`. Crumbs become impossible to query across sessions. The catalog locks down the names so every agent, every time, uses the same ones.
+
+After init, the agent knows which namespaces to use and how to drop crumbs correctly. See [Skills](/skills#the-init-skill) for the full details.
+
+## Manual setup
+
+If you'd rather set things up by hand:
+
+### Add crumbs to your code
+
+Every crumb line needs a `// @crumbs` marker so it can be stripped before merge.
+
+```typescript
+import { trail } from "agentcrumbs"; // @crumbs
+const crumb = trail("my-service"); // @crumbs
+
+export async function handleRequest(req: Request) {
+  crumb("incoming request", { path: req.url, method: req.method }); // @crumbs
+
+  const result = await processRequest(req);
+
+  crumb("request complete", { status: result.status }); // @crumbs
+  return result;
+}
+```
+
+### Enable tracing
+
+Set the `AGENTCRUMBS` environment variable:
+
+```bash
+AGENTCRUMBS=1 node your-app.js
+```
+
+Crumbs print to stderr in a readable format. Without `AGENTCRUMBS` set, every call is a true noop. Zero overhead.
+
+### Agent reads the trail
+
+When something breaks, the agent queries crumbs to see what happened:
+
+```bash
+# What happened in the last 5 minutes?
+agentcrumbs query --since 5m
+
+# Filter to a specific service
+agentcrumbs query --since 5m --ns my-service
+```
+
+The agent sees what executed, in what order, with what data. It can trace the root cause directly instead of guessing.
+
+## Use the collector (multi-service)
+
+For systems with multiple services, start the collector so crumbs from all services flow to one place:
+
+```bash
+# Terminal 1: Start collector
+agentcrumbs collect
+
+# Terminal 2: Run your app
+AGENTCRUMBS=1 node your-app.js
+
+# Terminal 3: Watch crumbs live
+agentcrumbs tail
+```
+
+## Strip before merge
+
+Crumbs are development-only. Remove them before merging:
+
+```bash
+# Preview what would be removed
+agentcrumbs strip --dry-run
+
+# Remove all marked crumb code
+agentcrumbs strip
+
+# CI gate (exits 1 if markers found)
+agentcrumbs strip --check
+```
+
+## Next steps
+
+- [Skills](/skills): how agents learn to use agentcrumbs from the package itself
+- [Workflow](/workflow): how crumbs fit into the branch lifecycle
+- [API reference](/api/trail): full API docs
+- [CLI reference](/cli/collect): collector, tail, query, strip

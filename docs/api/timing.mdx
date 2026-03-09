@@ -1,0 +1,63 @@
+---
+title: "Timing and assertions"
+description: "time(), timeEnd(), snapshot(), and assert()"
+---
+
+## `crumb.time(label)` / `crumb.timeEnd(label, data?)`
+
+Measure the duration of an operation.
+
+```typescript
+crumb.time("db-query"); // @crumbs
+const rows = await db.query("SELECT * FROM users");
+crumb.timeEnd("db-query", { rowCount: rows.length }); // @crumbs
+// Emits: { msg: "db-query", type: "time", data: { rowCount: 42, duration: 12.5 } }
+```
+
+### Parameters
+
+**`time(label)`**
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `label` | `string` | Timer label (must match between `time` and `timeEnd`) |
+
+**`timeEnd(label, data?)`**
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `label` | `string` | Timer label (must match `time`) |
+| `data` | `unknown` | Optional data to include with the timing crumb |
+
+## `crumb.snapshot(label, obj)`
+
+Capture a point-in-time snapshot of an object using `structuredClone`. The snapshot is independent of future mutations to the original object.
+
+```typescript
+crumb.snapshot("state-before", complexObject); // @crumbs
+mutate(complexObject);
+crumb.snapshot("state-after", complexObject); // @crumbs
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `label` | `string` | Label for the snapshot |
+| `obj` | `unknown` | Object to snapshot (cloned via `structuredClone`) |
+
+## `crumb.assert(condition, msg)`
+
+Debug-only assertion. Emits a crumb when the condition is falsy. Never throws. This is for debug tracing, not validation.
+
+```typescript
+crumb.assert(user != null, "user should exist after auth"); // @crumbs
+crumb.assert(items.length > 0, "cart should not be empty"); // @crumbs
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `condition` | `unknown` | Condition to check |
+| `msg` | `string` | Message emitted when condition is falsy |

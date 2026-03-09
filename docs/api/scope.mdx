@@ -1,0 +1,74 @@
+---
+title: "scope() and wrap()"
+description: "Wrap operations with automatic enter/exit/error tracking"
+---
+
+## `crumb.scope(name, fn)`
+
+Wrap a function with automatic entry/exit/error tracking and timing. Returns whatever the function returns. Works with sync and async functions.
+
+```typescript
+// #region @crumbs
+const user = await crumb.scope("validate-token", async (ctx) => {
+  ctx.crumb("checking jwt", { tokenPrefix: token.slice(0, 8) });
+  const result = await verify(token);
+  ctx.crumb("token valid", { userId: result.id });
+  return result;
+});
+// #endregion @crumbs
+```
+
+Output:
+
+```
+auth-service [validate-token] -> enter  +0ms
+auth-service   checking jwt             +1ms
+auth-service   token valid              +15ms
+auth-service [validate-token] <- exit   +16ms  { duration: 16.2 }
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Name for the scope (shown in output) |
+| `fn` | `(ctx) => T` | Function to execute. `ctx` has a `crumb` property for scoped crumbs. |
+
+### Error handling
+
+If the function throws, a `scope:error` crumb is emitted with the error details, then the error is re-thrown.
+
+### Nested scopes
+
+Scopes nest. Inner scopes get incremented depth and indentation:
+
+```typescript
+// #region @crumbs
+crumb.scope("outer", (ctx1) => {
+  ctx1.crumb.scope("inner", (ctx2) => {
+    ctx2.crumb("deep inside");
+  });
+});
+// #endregion @crumbs
+```
+
+## `crumb.wrap(name, fn)`
+
+Wrap any function with automatic scope tracking. Returns a function with the same signature.
+
+```typescript
+const trackedFetch = crumb.wrap("fetch", fetch); // @crumbs
+const response = await trackedFetch("https://api.example.com/data"); // @crumbs
+// Automatically emits scope:enter, scope:exit (or scope:error)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Name for the scope (shown in output) |
+| `fn` | `Function` | The function to wrap |
+
+### Return value
+
+Returns a function with the same signature as the input. When disabled, returns the original function unwrapped.

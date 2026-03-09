@@ -1,0 +1,7 @@
+{
+  "name": "agentcrumbs-docs",
+  "private": true,
+  "scripts": {
+    "dev": "mintlify dev"
+  }
+}

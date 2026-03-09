@@ -1,0 +1,61 @@
+---
+title: "Environment variable"
+description: "Configure agentcrumbs with the AGENTCRUMBS env var"
+---
+
+Everything is controlled by a single `AGENTCRUMBS` environment variable.
+
+## Shorthand values
+
+| Value | Effect |
+| --- | --- |
+| `1` | Enable all namespaces |
+| `*` | Enable all namespaces |
+| `true` | Enable all namespaces |
+| (unset) | Disabled. All calls are noop. |
+
+```bash
+AGENTCRUMBS=1 node your-app.js
+```
+
+## Namespace filter
+
+Non-JSON string values are treated as namespace filters:
+
+```bash
+AGENTCRUMBS=auth-*           # Wildcard match
+AGENTCRUMBS=auth-service     # Exact match
+```
+
+## JSON config
+
+For full control, pass a JSON object:
+
+```bash
+# Enable specific namespaces
+AGENTCRUMBS='{"ns":"auth-*,api-*"}'
+
+# With exclusions
+AGENTCRUMBS='{"ns":"* -internal-*"}'
+
+# Custom port
+AGENTCRUMBS='{"ns":"*","port":9999}'
+
+# JSON output format (instead of pretty)
+AGENTCRUMBS='{"ns":"*","format":"json"}'
+```
+
+## Config schema
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ns` | `string` | (required) | Namespace filter pattern |
+| `port` | `number` | `8374` | Collector HTTP port |
+| `format` | `"pretty"` \| `"json"` | `"pretty"` | Output format for stderr |
+
+## Namespace patterns
+
+- `*` matches everything
+- `auth-*` matches `auth-service`, `auth-oauth`, etc.
+- `auth-*,api-*` matches multiple patterns (comma or space separated)
+- `* -internal-*` matches everything except namespaces starting with `internal-`

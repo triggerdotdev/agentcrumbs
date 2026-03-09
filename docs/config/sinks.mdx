@@ -1,0 +1,49 @@
+---
+title: "Sinks"
+description: "Configure where crumbs are sent"
+---
+
+By default, crumbs are sent via HTTP to the collector and also printed to stderr. You can add custom sinks or replace the defaults.
+
+## Custom sink
+
+```typescript
+import { trail, addSink, removeSink } from "agentcrumbs";
+import type { Sink, Crumb } from "agentcrumbs";
+
+const mySink: Sink = {
+  write(crumb: Crumb) {
+    myLogger.info(crumb);
+  },
+};
+
+addSink(mySink);
+```
+
+## Built-in sinks
+
+### HttpSink
+
+Sends crumbs to the collector via HTTP. Added automatically when `AGENTCRUMBS` is set.
+
+```typescript
+import { HttpSink } from "agentcrumbs";
+```
+
+### ConsoleSink
+
+Pretty-printed stderr output. Added automatically when `AGENTCRUMBS` is set.
+
+```typescript
+import { ConsoleSink } from "agentcrumbs";
+```
+
+## Sink interface
+
+```typescript
+interface Sink {
+  write(crumb: Crumb): void;
+}
+```
+
+The `write` method receives a `Crumb` object (see [crumb format](/crumb-format)). It should not throw.

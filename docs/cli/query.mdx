@@ -1,0 +1,48 @@
+---
+title: "query"
+description: "Search historical crumbs"
+---
+
+## `agentcrumbs query`
+
+Query historical crumbs with time ranges and filters.
+
+```bash
+agentcrumbs query --since 5m
+```
+
+### Options
+
+| Flag | Description |
+| --- | --- |
+| `--since <duration>` | Time range (e.g., `5m`, `1h`, `24h`, `7d`) |
+| `--ns <pattern>` | Filter by namespace |
+| `--tag <tag>` | Filter by tag |
+| `--session <id>` | Filter by session ID |
+| `--match <text>` | Text search |
+| `--json` | JSON output |
+| `--limit <n>` | Maximum number of results |
+
+Time units: `s` (seconds), `m` (minutes), `h` (hours), `d` (days).
+
+### Examples
+
+```bash
+# Last 5 minutes
+agentcrumbs query --since 5m
+
+# Last hour, filtered by namespace
+agentcrumbs query --since 1h --ns auth-service
+
+# Filter by tag
+agentcrumbs query --tag root-cause
+
+# Filter by session
+agentcrumbs query --session a1b2c3
+
+# JSON output with limit
+agentcrumbs query --since 1h --json --limit 50
+
+# Text search
+agentcrumbs query --since 24h --match "connection refused"
+```

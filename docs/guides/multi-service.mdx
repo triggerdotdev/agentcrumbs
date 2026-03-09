@@ -1,0 +1,66 @@
+---
+title: "Multi-service setup"
+description: "Use the collector to aggregate crumbs from multiple services"
+---
+
+agentcrumbs is designed for systems with multiple services running locally.
+
+## Architecture
+
+```
+Service A ──┐                                ┌── $ agentcrumbs tail
+Service B ──┤── fetch() ──> Collector :8374 ──┤── $ agentcrumbs query --since 5m
+Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/crumbs.jsonl
+```
+
+1. Each service imports `agentcrumbs` and calls `trail()` to create namespaced trail functions
+2. When `AGENTCRUMBS` is set, crumbs are sent via HTTP to the collector
+3. The collector writes crumbs to a shared JSONL file
+4. The CLI reads from the JSONL file to provide tail, query, and replay
+
+## Setup
+
+```bash
+# Terminal 1: Start collector
+agentcrumbs collect
+
+# Terminal 2: Start your services
+AGENTCRUMBS=1 node auth-service.js &
+AGENTCRUMBS=1 node api-gateway.js &
+AGENTCRUMBS=1 node task-runner.js &
+
+# Terminal 3: Watch everything
+agentcrumbs tail
+
+# Or filter to one service
+agentcrumbs tail --ns auth-service
+```
+
+All services write to the same collector, so `agentcrumbs tail` shows interleaved output from all services with namespace-colored labels.
+
+## Per-service filtering
+
+Use the namespace filter to enable only specific services:
+
+```bash
+# Only auth service crumbs
+AGENTCRUMBS='auth-service' node auth-service.js
+
+# Auth and API crumbs
+AGENTCRUMBS='{"ns":"auth-*,api-*"}' node api-gateway.js
+
+# Everything except internal
+AGENTCRUMBS='{"ns":"* -internal-*"}' node task-runner.js
+```
+
+## Custom collector port
+
+If port 8374 is taken:
+
+```bash
+# Collector on custom port
+agentcrumbs collect --port 9999
+
+# Services must match
+AGENTCRUMBS='{"ns":"*","port":9999}' node auth-service.js
+```

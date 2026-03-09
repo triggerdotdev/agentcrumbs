@@ -1,0 +1,46 @@
+---
+title: "Tracing into node_modules"
+description: "Add crumbs to library internals without importing agentcrumbs"
+---
+
+You can add crumbs directly to files inside `node_modules/` to trace into library internals. See what a dependency is actually doing, what it receives, what it returns. These files are gitignored and never committed, so no `// @crumbs` markers are needed.
+
+## Raw fetch, no import required
+
+Paste this anywhere in a `node_modules` file:
+
+```javascript
+fetch("http://localhost:8374/crumb", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    ts: new Date().toISOString(),
+    ns: "library-name",
+    msg: "what is happening here",
+    type: "crumb",
+    dt: 0,
+    pid: process.pid,
+    data: { arg1, arg2 }
+  })
+}).catch(() => {});
+```
+
+This sends a crumb directly to the collector via HTTP. No import needed. `fetch` is available globally in Node 18+ and Bun.
+
+## Why this works
+
+- `node_modules/` is gitignored, so changes never get committed
+- No `// @crumbs` markers needed since the files aren't tracked
+- A fresh `npm install` resets everything back to normal
+- The collector receives crumbs from any source. It doesn't care if they come from your code or a library.
+
+## Tips
+
+- Change `ns` to the library name so crumbs show up with a clear label in `tail`
+- Include relevant variables in `data`: function arguments, return values, internal state
+- Add `.catch(() => {})` so the crumb never throws if the collector isn't running
+- For one-liner insertion: keep it on a single line
+
+```javascript
+fetch("http://localhost:8374/crumb", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ts: new Date().toISOString(), ns: "lib-name", msg: "debug", type: "crumb", dt: 0, pid: process.pid, data: { val } }) }).catch(() => {});
+```

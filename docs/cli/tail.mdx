@@ -1,0 +1,42 @@
+---
+title: "tail"
+description: "Watch crumbs in real time"
+---
+
+## `agentcrumbs tail`
+
+Watch crumbs in real time. Reads from the JSONL file and watches for changes.
+
+```bash
+agentcrumbs tail
+```
+
+### Options
+
+| Flag | Description |
+| --- | --- |
+| `--ns <pattern>` | Filter by namespace (supports wildcards) |
+| `--tag <tag>` | Filter by tag |
+| `--match <text>` | Filter by content |
+| `--session <id>` | Filter by session ID |
+| `--json` | JSON output (for piping to jq, etc.) |
+
+### Examples
+
+```bash
+# Filter by namespace
+agentcrumbs tail --ns auth-service
+agentcrumbs tail --ns "auth-*"
+
+# Filter by tag
+agentcrumbs tail --tag perf
+
+# Filter by content
+agentcrumbs tail --match "userId:123"
+
+# Filter by session
+agentcrumbs tail --session a1b2c3
+
+# JSON output for piping
+agentcrumbs tail --json | jq '.data.userId'
+```

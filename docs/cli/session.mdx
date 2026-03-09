@@ -1,0 +1,37 @@
+---
+title: "session"
+description: "Start and stop debug sessions from the CLI"
+---
+
+## `agentcrumbs session`
+
+Start and stop debug sessions from the CLI. When a session is active, all services automatically tag their crumbs with the session ID.
+
+### Start a session
+
+```bash
+agentcrumbs session start "debugging-auth-timeout"
+# Session started: a1b2c3 (debugging-auth-timeout)
+# All services will tag crumbs with this session.
+```
+
+### Stop a session
+
+```bash
+agentcrumbs session stop
+# Session stopped: a1b2c3 (debugging-auth-timeout) - 2m 15s
+```
+
+### How it works
+
+The session mechanism works by writing the active session ID to `/tmp/agentcrumbs.session`. Library instances check this file and automatically attach the session ID to outgoing crumbs. No code changes needed.
+
+### Filtering by session
+
+```bash
+# Tail only session crumbs
+agentcrumbs tail --session a1b2c3
+
+# Query session crumbs
+agentcrumbs query --session a1b2c3
+```

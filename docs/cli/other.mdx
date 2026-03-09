@@ -1,0 +1,55 @@
+---
+title: "Other commands"
+description: "stats, clear, follow, replay, sessions"
+---
+
+## `agentcrumbs stats`
+
+Show crumb counts, file size, and active services.
+
+```bash
+agentcrumbs stats
+```
+
+## `agentcrumbs clear`
+
+Delete all stored crumbs.
+
+```bash
+agentcrumbs clear
+```
+
+## `agentcrumbs sessions`
+
+List all recorded sessions.
+
+```bash
+agentcrumbs sessions
+# ID          Name                        Duration  Crumbs  Status
+# ----------  -------------------------  ----------  ------  ------
+# a1b2c3      debugging-auth-timeout     2m 15s      47     stopped
+```
+
+## `agentcrumbs replay`
+
+Replay a session's crumbs in order.
+
+```bash
+agentcrumbs replay a1b2c3
+```
+
+## `agentcrumbs follow`
+
+Follow a specific trace across services.
+
+```bash
+agentcrumbs follow --trace a1b2c3
+```
+
+## `agentcrumbs --help`
+
+Show full help text.
+
+```bash
+agentcrumbs --help
+```
