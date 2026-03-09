@@ -1,0 +1,4 @@
+{
+  "title": "CLI",
+  "pages": ["collect", "tail", "query", "strip", "session", "other"]
+}

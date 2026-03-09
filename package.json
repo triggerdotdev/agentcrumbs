@@ -39,6 +39,8 @@
     "dev": "tsc --watch",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
+    "docs:dev": "pnpm -F agentcrumbs-docs dev",
+    "docs:build": "pnpm -F agentcrumbs-docs build",
     "changeset": "changeset"
   },
   "devDependencies": {

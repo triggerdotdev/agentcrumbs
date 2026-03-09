@@ -1,0 +1,19 @@
+{
+  "root": true,
+  "title": "agentcrumbs",
+  "pages": [
+    "index",
+    "quickstart",
+    "workflow",
+    "---API---",
+    "...api",
+    "---CLI---",
+    "...cli",
+    "---Guides---",
+    "...guides",
+    "---Reference---",
+    "...config",
+    "skills",
+    "crumb-format"
+  ]
+}
