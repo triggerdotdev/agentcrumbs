@@ -225,30 +225,33 @@ export default function HomePage() {
       {/* SKILLS */}
       <section className="hp-skills">
         <div className="hp-container">
-          <h2>The init skill is the real setup</h2>
-          <p className="hp-section-subtitle">After installing, tell your agent to run <code>agentcrumbs/init</code>. It scans your repo, discovers your services and modules, and builds a <strong>namespace catalog</strong> that gets written to your agent config (CLAUDE.md, .cursorrules, etc.).</p>
-          <p className="hp-section-subtitle">This is the critical step. Without the catalog, every agent invents its own namespace names: <code>auth</code>, <code>auth-service</code>, <code>authService</code>, <code>authentication</code>, all pointing at the same thing. The catalog locks it down. Every agent, every session, same names.</p>
+          <h2>Set up with <code>agentcrumbs/init</code></h2>
+          <p className="hp-section-subtitle">The init skill scans your repo, discovers services and modules, and writes a namespace table to your agent config (CLAUDE.md, .cursorrules, etc.). Agents use the table to pick consistent namespace names across sessions.</p>
 
           <div className="hp-skills-install">
             <div className="hp-code-pane-header" style={{ borderRadius: '8px 8px 0 0' }}>
               <div className="hp-code-pane-label">what init writes to your agent config</div>
             </div>
-            <pre className="hp-skills-pre"><code dangerouslySetInnerHTML={{ __html: `<span class="trail-msg">## agentcrumbs</span>
-
-<span class="trail-msg">### Namespaces</span>
-
-<span class="cc-dim">| Namespace        | Description                      | Path              |</span>
-<span class="cc-dim">| ---              | ---                              | ---               |</span>
-| <span class="trail-name">api-gateway</span>    | <span class="cc-dim">HTTP API and routing</span>             | <span class="cc-dim">apps/gateway</span>      |
-| <span class="trail-name-b">auth-service</span>   | <span class="cc-dim">Authentication and token handling</span> | <span class="cc-dim">apps/auth</span>         |
-| <span class="trail-name-c">billing</span>        | <span class="cc-dim">Stripe integration and charges</span>   | <span class="cc-dim">apps/billing</span>      |
-| <span class="trail-name">task-runner</span>    | <span class="cc-dim">Background job execution</span>         | <span class="cc-dim">apps/worker</span>       |
-
-<span class="cc-dim">Do not invent new namespaces. Pick from this table or ask first.</span>` }} /></pre>
+            <div className="hp-skills-config">
+              <div className="hp-skills-config-heading">## agentcrumbs</div>
+              <div className="hp-skills-config-heading">### Namespaces</div>
+              <table className="hp-skills-table">
+                <thead>
+                  <tr><th>Namespace</th><th>Description</th><th>Path</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td className="trail-name">api-gateway</td><td>HTTP API and routing</td><td>apps/gateway</td></tr>
+                  <tr><td className="trail-name-b">auth-service</td><td>Authentication and token handling</td><td>apps/auth</td></tr>
+                  <tr><td className="trail-name-c">billing</td><td>Stripe integration and charges</td><td>apps/billing</td></tr>
+                  <tr><td className="trail-name">task-runner</td><td>Background job execution</td><td>apps/worker</td></tr>
+                </tbody>
+              </table>
+              <div className="hp-skills-config-note">Do not invent new namespaces. Pick from this table or ask first.</div>
+            </div>
           </div>
 
           <div className="hp-skills-detail">
-            <p>agentcrumbs ships 5 skills via <a href="https://tanstack.com/blog/from-docs-to-agents" target="_blank">@tanstack/intent</a>, covering the full API, CLI, and common mistakes. Skills travel with the package version, so the agent always has docs matching the installed code.</p>
+            <p>agentcrumbs ships 2 skills via <a href="https://tanstack.com/blog/from-docs-to-agents" target="_blank">@tanstack/intent</a>: one covering the core workflow, API, and common mistakes, and an init skill that sets up your repo. Skills travel with the package version, so the agent always has docs matching the installed code.</p>
             <p>Compatible with Claude Code, Cursor, GitHub Copilot, and any agent that supports the <a href="https://agentskills.io" target="_blank">Agent Skills spec</a>.</p>
           </div>
         </div>

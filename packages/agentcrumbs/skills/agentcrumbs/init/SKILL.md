@@ -9,9 +9,9 @@ description: >
   catalog in its agent config files.
 type: lifecycle
 library: agentcrumbs
-library_version: "0.1.0"
+library_version: "0.2.0"
 requires:
-  - agentcrumbs/core
+  - agentcrumbs
 sources:
   - "triggerdotdev/trigger-labs:debug-mode/README.md"
   - "triggerdotdev/trigger-labs:debug-mode/src/types.ts"

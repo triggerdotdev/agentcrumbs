@@ -120,6 +120,12 @@
 .hp-skills h2 { font-family: var(--hp-title); font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
 .hp-skills-install { background: var(--hp-bg-code); border: 1px solid var(--hp-border); border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
 .hp-skills-pre { padding: 20px; overflow-x: auto; font-family: var(--hp-mono); font-size: 12.5px; line-height: 1.7; color: var(--hp-text-dim); margin: 0; background: transparent !important; }
+.hp-skills-config { padding: 20px; font-family: var(--hp-mono); font-size: 13px; }
+.hp-skills-config-heading { color: var(--hp-text); font-weight: 600; margin-bottom: 12px; }
+.hp-skills-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+.hp-skills-table th { text-align: left; color: var(--hp-text-dim); font-weight: 500; padding: 6px 16px 6px 0; border-bottom: 1px solid var(--hp-border); }
+.hp-skills-table td { color: var(--hp-text-dim); padding: 6px 16px 6px 0; border-bottom: 1px solid var(--hp-border); }
+.hp-skills-config-note { color: var(--hp-text-muted); font-size: 12px; }
 .hp-skills-detail { display: flex; gap: 32px; }
 .hp-skills-detail p { color: var(--hp-text-dim); font-size: 14px; line-height: 1.6; flex: 1; }
 .hp-skills-detail a { color: var(--hp-accent); }
