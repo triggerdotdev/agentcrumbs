@@ -6,8 +6,7 @@ on:
       - main
     paths:
       - ".changeset/**"
-      - "src/**"
-      - "package.json"
+      - "packages/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

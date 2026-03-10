@@ -1,71 +1,14 @@
 {
-  "name": "agentcrumbs",
-  "version": "0.1.0",
-  "description": "Debug tracing for agents. Drop crumbs, follow the trail.",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./test": {
-      "import": "./dist/sinks/memory.js",
-      "types": "./dist/sinks/memory.d.ts"
-    }
-  },
-  "bin": {
-    "agentcrumbs": "./dist/cli/index.js",
-    "intent": "./bin/intent.js"
-  },
-  "files": [
-    "dist",
-    "skills",
-    "bin",
-    "!skills/_artifacts"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/triggerdotdev/agentcrumbs.git"
-  },
-  "homepage": "https://agentcrumbs.dev",
-  "bugs": {
-    "url": "https://github.com/triggerdotdev/agentcrumbs/issues"
-  },
-  "intent": {
-    "version": 1,
-    "repo": "triggerdotdev/agentcrumbs",
-    "docs": "https://docs.agentcrumbs.dev"
-  },
+  "private": true,
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit",
+    "build": "pnpm -F agentcrumbs build",
+    "test": "pnpm -F agentcrumbs test",
+    "typecheck": "pnpm -F agentcrumbs typecheck",
+    "changeset": "changeset",
     "docs:dev": "pnpm -F agentcrumbs-docs dev",
-    "docs:build": "pnpm -F agentcrumbs-docs build",
-    "changeset": "changeset"
+    "docs:build": "pnpm -F agentcrumbs-docs build"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.0",
-    "@types/node": "^25.3.3",
-    "typescript": "^5.7.0",
-    "vitest": "^3.0.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "license": "MIT",
-  "keywords": [
-    "debug",
-    "tracing",
-    "agents",
-    "ai",
-    "logging",
-    "observability",
-    "claude",
-    "cursor",
-    "copilot"
-  ]
+    "@changesets/cli": "^2.27.0"
+  }
 }
