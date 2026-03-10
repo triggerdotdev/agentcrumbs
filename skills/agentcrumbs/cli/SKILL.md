@@ -43,16 +43,15 @@ Run it in the background before launching the service under test, then
 query or tail after reproducing the issue. Stop it when you're done.
 
 ```bash
-# Start collector in background, run the service, query results
+# Start collector, clear old crumbs, reproduce, query
 agentcrumbs collect --quiet &
-AGENTCRUMBS=1 node app.js &
-# ... reproduce the bug ...
-agentcrumbs query --since 5m
-# When done, kill the collector
-kill %1
+agentcrumbs clear
+AGENTCRUMBS=1 node app.js
+agentcrumbs query
 ```
 
-This is the normal workflow: you own the collector lifecycle.
+Clear before reproducing so you only see crumbs from this run.
+No `--since` needed when you clear first.
 
 ```bash
 agentcrumbs collect

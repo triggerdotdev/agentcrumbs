@@ -1,5 +1,5 @@
 import type { Crumb, Sink } from "../types.js";
-import { sendCrumb } from "../transport/socket.js";
+import { sendCrumb } from "../transport/http.js";
 
 export class HttpSink implements Sink {
   constructor(private url: string) {}
@@ -8,6 +8,3 @@ export class HttpSink implements Sink {
     sendCrumb(crumb, this.url);
   }
 }
-
-/** @deprecated Use HttpSink instead */
-export const SocketSink = HttpSink;

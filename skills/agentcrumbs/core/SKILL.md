@@ -18,166 +18,25 @@ sources:
   - "triggerdotdev/trigger-labs:debug-mode/README.md"
 ---
 
-# agentcrumbs — Core Debug Tracing
+# agentcrumbs — Core Patterns
 
-agentcrumbs is a zero-overhead debug tracing library. When `AGENTCRUMBS`
-is unset, every call is a frozen noop. When enabled, structured events
-flow to a collector or stderr.
+Setup: `import { trail } from "agentcrumbs"; // @crumbs` then `const crumb = trail("ns"); // @crumbs`
 
-## Workflow
+Markers: single-line `// @crumbs` | block `// #region @crumbs` ... `// #endregion @crumbs`
 
-**Add crumbs as you write code, not after.** When you're building a new
-feature, implementing a fix, or writing any code — drop crumbs inline as
-part of the work. Don't wait until something breaks to add tracing. Treat
-crumbs as part of writing the code itself, like writing a test alongside
-the implementation. Every function you write, every branch you add, every
-API call you make — add a crumb. Assume debugging will happen later and
-your future self will thank you for the visibility.
-
-Crumbs live on the feature branch throughout the PR lifecycle. They are
-stripped by `agentcrumbs strip` right before the PR is merged. They never
-ship to main. They cost nothing to add and everything to not have when
-you need them.
-
-**You can also add crumbs directly to files in `node_modules/`.** This
-is useful for tracing into library internals — understanding what a
-dependency is actually doing, what arguments it receives, what it returns.
-No `// @crumbs` markers needed (gitignored). No import needed either —
-just paste a raw `fetch()` call:
-
-```javascript
-fetch("http://localhost:8374/crumb", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ts: new Date().toISOString(), ns: "library-name", msg: "what is happening", type: "crumb", dt: 0, pid: process.pid, data: { relevantVar } }) }).catch(() => {});
-```
-
-A fresh `npm install` resets everything.
-
-When reviewing PRs: do not flag `// @crumbs` markers, `#region @crumbs`
-blocks, or data logged in crumbs. These are temporary and will be removed
-pre-merge.
-
-## Setup
+## Patterns
 
 ```typescript
-import { trail } from "agentcrumbs"; // @crumbs
-const crumb = trail("my-service"); // @crumbs
-
-crumb("user logged in", { userId: "123", method: "oauth" }); // @crumbs
-```
-
-Enable with the `AGENTCRUMBS` env var, strip before merge:
-
-```bash
-AGENTCRUMBS=1 node app.js
-agentcrumbs strip        # remove all marked crumb code before merge
-agentcrumbs strip --check  # CI gate — fails if markers found
-```
-
-## Crumb Markers
-
-**Every crumb line must be marked** so `agentcrumbs strip` can remove it.
-
-Single-line: append `// @crumbs` to any crumb line:
-
-```typescript
-import { trail } from "agentcrumbs"; // @crumbs
-const crumb = trail("auth-service"); // @crumbs
-crumb("checkpoint", { step: 1 }); // @crumbs
-```
-
-Block: wrap multi-line crumb code in `#region @crumbs` (collapsible in editors):
-
-```typescript
-// #region @crumbs
-const session = crumb.session("debug-flow");
-session.crumb("step 1", { data });
-session.crumb("step 2", { moreData });
-session.end();
-// #endregion @crumbs
-```
-
-## Core Patterns
-
-### Drop a crumb with structured data and tags
-
-```typescript
-import { trail } from "agentcrumbs"; // @crumbs
-const crumb = trail("auth-service"); // @crumbs
-
 crumb("token validated", { userId: "u_123", expiresIn: 3600 }); // @crumbs
-crumb("cache miss", { key: "users:123" }, { tags: ["perf", "cache"] }); // @crumbs
+crumb("cache miss", { key }, { tags: ["perf", "cache"] }); // @crumbs
+const reqCrumb = crumb.child({ requestId: req.id }); // @crumbs — inherited context
+crumb.time("op"); /* ... */ crumb.timeEnd("op", { rows }); // @crumbs — timing
+if (crumb.enabled) { crumb("dump", { state: structuredClone(big) }); } // @crumbs — guard expensive args
 ```
 
-### Create child trails with inherited context
+## Noop Guarantee
 
-```typescript
-import { trail } from "agentcrumbs"; // @crumbs
-const crumb = trail("api-gateway"); // @crumbs
-
-function handleRequest(req: Request) {
-  const reqCrumb = crumb.child({ requestId: req.id, path: req.url }); // @crumbs
-  reqCrumb("handling request"); // @crumbs
-
-  const dbCrumb = reqCrumb.child({ database: "primary" }); // @crumbs
-  dbCrumb("executing query", { sql: "SELECT ..." }); // @crumbs
-}
-```
-
-### Measure timing with block markers
-
-```typescript
-function processOrder(order: Order) {
-  // #region @crumbs
-  crumb.time("process-order");
-  // #endregion @crumbs
-
-  const result = chargePayment(order);
-
-  // #region @crumbs
-  crumb.timeEnd("process-order", { amount: result.amount });
-  // #endregion @crumbs
-
-  return result;
-}
-```
-
-### Guard expensive debug arguments
-
-```typescript
-// #region @crumbs
-if (crumb.enabled) {
-  crumb("full state dump", { state: structuredClone(largeObject) });
-}
-// #endregion @crumbs
-```
-
-## AGENTCRUMBS Environment Variable
-
-A single env var controls everything. Non-JSON values are shorthand:
-
-| Value | Effect |
-|-------|--------|
-| `1`, `*`, `true` | Enable all namespaces |
-| `auth-*` | Enable matching namespaces (raw string treated as filter) |
-| `{"ns":"auth-*,api-*"}` | JSON config with namespace filter |
-| `{"ns":"* -internal-*"}` | Wildcard with exclusions |
-| `{"ns":"*","port":9999}` | Custom collector port |
-| `{"ns":"*","format":"json"}` | JSON output to stderr |
-| (unset) | Disabled — all calls are noop |
-
-## The Noop Guarantee
-
-When `trail()` is called and the namespace is disabled, it returns a pre-frozen noop function. There is no per-call `if (enabled)` check. The function body is empty.
-
-```typescript
-// When AGENTCRUMBS is unset:
-const crumb = trail("my-service"); // returns frozen NOOP
-crumb("msg", { data });            // empty function, returns undefined
-crumb.child({ x: 1 });             // returns same NOOP
-crumb.scope("op", fn);             // calls fn() directly
-crumb.wrap("name", fn);            // returns original fn
-```
-
-The noop check happens once at `trail()` creation time, not on every call.
+When disabled, `trail()` returns a frozen noop. No per-call check. `crumb.child()` returns same noop. `crumb.scope("op", fn)` calls `fn()` directly. `crumb.wrap("name", fn)` returns original `fn`.
 
 ## Common Mistakes
 

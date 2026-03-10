@@ -27,8 +27,9 @@ The agent starts the [collector](/cli/collect) (if it isn't already running), re
 
 ```bash
 agentcrumbs collect --quiet &
+agentcrumbs clear
 AGENTCRUMBS=1 node app.js
-agentcrumbs query --since 5m --ns auth-service
+agentcrumbs query --ns auth-service
 ```
 
 Now the agent sees what executed, in what order, with what data. It can trace the root cause directly instead of reading source and guessing.

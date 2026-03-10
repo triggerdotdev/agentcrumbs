@@ -31,8 +31,13 @@ export class CollectorServer extends EventEmitter {
         }
 
         if (req.url === "/health" && req.method === "GET") {
-          res.writeHead(200);
-          res.end("ok");
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({
+            status: "ok",
+            port: this.port,
+            store: this.store.getFilePath(),
+            session: this.getActiveSession() ?? null,
+          }));
           return;
         }
 

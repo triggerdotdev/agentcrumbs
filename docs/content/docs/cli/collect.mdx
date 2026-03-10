@@ -17,22 +17,16 @@ agentcrumbs collect
 
 ### Agent workflow
 
-When an agent needs to debug something, it should start the collector itself:
+When an agent needs to debug something, it should start the collector, clear old crumbs, reproduce, and query:
 
 ```bash
-# Start collector in background
 agentcrumbs collect --quiet &
-
-# Run the service with crumbs enabled
+agentcrumbs clear
 AGENTCRUMBS=1 node app.js
-
-# ... reproduce the issue ...
-
-# Query the trail
-agentcrumbs query --since 5m
+agentcrumbs query
 ```
 
-The agent owns the collector lifecycle. Start it before debugging, query the results, stop it when done. The `--quiet` flag keeps it from cluttering stdout.
+Clear before reproducing so you only see crumbs from this run. No `--since` guessing needed. The `--quiet` flag keeps the collector from cluttering stdout.
 
 ### Options
 

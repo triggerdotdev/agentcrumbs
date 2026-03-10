@@ -1,5 +1,6 @@
 import { CollectorServer } from "../../collector/server.js";
 import { formatCrumbPretty } from "../format.js";
+import { getFlag, hasFlag } from "../args.js";
 import type { Crumb } from "../../types.js";
 
 const DEFAULT_PORT = 8374;
@@ -8,7 +9,7 @@ export async function collect(args: string[]): Promise<void> {
   const portStr = getFlag(args, "--port");
   const port = portStr ? parseInt(portStr, 10) : DEFAULT_PORT;
   const storeDir = getFlag(args, "--dir");
-  const quiet = args.includes("--quiet");
+  const quiet = hasFlag(args, "--quiet");
 
   const server = new CollectorServer(port, storeDir ?? undefined);
 
@@ -40,8 +41,3 @@ export async function collect(args: string[]): Promise<void> {
   process.on("SIGTERM", shutdown);
 }
 
-function getFlag(args: string[], flag: string): string | undefined {
-  const idx = args.indexOf(flag);
-  if (idx === -1 || idx + 1 >= args.length) return undefined;
-  return args[idx + 1];
-}

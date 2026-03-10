@@ -3,6 +3,7 @@ import os from "node:os";
 import type { Crumb } from "../../types.js";
 import { CrumbStore } from "../../collector/store.js";
 import { formatCrumbPretty, formatCrumbJson } from "../format.js";
+import { getFlag, hasFlag } from "../args.js";
 
 export async function query(args: string[]): Promise<void> {
   const ns = getFlag(args, "--ns");
@@ -10,7 +11,7 @@ export async function query(args: string[]): Promise<void> {
   const since = getFlag(args, "--since");
   const session = getFlag(args, "--session");
   const match = getFlag(args, "--match");
-  const json = args.includes("--json");
+  const json = hasFlag(args, "--json");
   const limit = parseInt(getFlag(args, "--limit") ?? "100", 10);
 
   const store = new CrumbStore(path.join(os.homedir(), ".agentcrumbs"));
@@ -79,8 +80,3 @@ function parseSince(since: string): number {
   return Date.now() - value * multipliers[unit]!;
 }
 
-function getFlag(args: string[], flag: string): string | undefined {
-  const idx = args.indexOf(flag);
-  if (idx === -1 || idx + 1 >= args.length) return undefined;
-  return args[idx + 1];
-}
