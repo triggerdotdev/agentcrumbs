@@ -155,15 +155,7 @@ export default function HomePage() {
             </div>
             <div className="hp-install-step">
               <div className="hp-install-step-num">2</div>
-              <div className="hp-install-bar">
-                <span className="hp-prompt-sign">$</span>
-                <code id="intent-cmd">npx @tanstack/intent install</code>
-                <button className="hp-copy-btn" onClick={(e) => copyCmd('intent-cmd', e.currentTarget)}>copy</button>
-              </div>
-            </div>
-            <div className="hp-install-step">
-              <div className="hp-install-step-num">3</div>
-              <div className="hp-install-step-text">Tell your agent: <span style={{ color: 'var(--hp-text)' }}>&quot;Run the agentcrumbs/init skill&quot;</span></div>
+              <div className="hp-install-step-text">Tell your agent: <span style={{ color: 'var(--hp-text)' }}>&quot;Run npx @tanstack/intent install, then run the agentcrumbs/init skill&quot;</span></div>
             </div>
           </div>
         </div>

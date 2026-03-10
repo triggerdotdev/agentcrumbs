@@ -31,20 +31,17 @@ Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/crum
 - **Strip before merge.** `agentcrumbs strip` removes all `// @crumbs` lines and `#region @crumbs` blocks. Clean diffs, no debug code on main.
 - **HTTP collector.** `agentcrumbs collect` receives crumbs from all services via fire-and-forget HTTP. Tail, query, and replay from the CLI.
 - **Works with any agent.** Claude Code, Cursor, Copilot, Aider, custom agents. If the agent can write code, it can write crumbs.
-- **Ships with agent skills.** Built on [@tanstack/intent](https://tanstack.com/blog/from-docs-to-agents). Install the package, run `npx @tanstack/intent install`, and the agent learns how to use crumbs from the package itself. No stale training data.
+- **Ships with agent skills.** Built on [@tanstack/intent](https://tanstack.com/blog/from-docs-to-agents). Install the package, tell your agent to run `npx @tanstack/intent install`, and it learns how to use crumbs from the package itself. No stale training data.
 
 ## Install
 
 ```bash
 npm install agentcrumbs
-npx @tanstack/intent install
 ```
 
-Then tell your agent: **"Run the agentcrumbs/init skill."**
+Then tell your agent: **"Run `npx @tanstack/intent@latest install` to set up agentcrumbs skills, then run the agentcrumbs/init skill."**
 
-This is the critical step. The [init skill](/skills#the-init-skill) scans your repo, discovers services and modules, and builds a namespace catalog that gets written to your agent config (CLAUDE.md, .cursorrules, etc.). Without the catalog, every agent invents its own namespace names. With it, every agent, every session, same names.
-
-See the [quickstart](/quickstart) for the full setup.
+The agent wires skills into your agent config (CLAUDE.md, .cursorrules, etc.) and scans your repo to build a namespace catalog. See the [quickstart](/quickstart) for the full setup.
 
 ## How it works
 

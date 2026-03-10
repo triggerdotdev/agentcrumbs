@@ -3,7 +3,7 @@ title: "Agent skills"
 description: "How agents learn to use agentcrumbs via @tanstack/intent"
 ---
 
-agentcrumbs ships with agent skills inside the npm package, built on the [@tanstack/intent](https://tanstack.com/blog/from-docs-to-agents) standard. When you install the package and run `npx @tanstack/intent install`, your agent automatically learns how to use crumbs correctly.
+agentcrumbs ships with agent skills inside the npm package, built on the [@tanstack/intent](https://tanstack.com/blog/from-docs-to-agents) standard. Tell your agent to run `npx @tanstack/intent install` and it will set up skill-to-task mappings in your agent config so it knows when to load agentcrumbs patterns.
 
 Skills travel with the package version. The agent always has docs matching the installed code, not stale training data from 6 months ago.
 
@@ -13,10 +13,9 @@ The fastest way to set up agentcrumbs in a project is to let the agent do it:
 
 ```bash
 npm install agentcrumbs
-npx @tanstack/intent install
 ```
 
-This scans `node_modules` for intent-enabled packages and wires the skills into your agent config file (CLAUDE.md, .cursorrules, etc.). Then tell your agent:
+Then tell your agent:
 
 > "Run the agentcrumbs/init skill to set up debug tracing in this project."
 
@@ -76,4 +75,4 @@ node_modules/agentcrumbs/skills/agentcrumbs/SKILL.md
 node_modules/agentcrumbs/skills/agentcrumbs/init/SKILL.md
 ```
 
-Or add a reference in your agent config file manually. But `npx @tanstack/intent install` handles all of this automatically.
+Or add a reference in your agent config file manually. But telling your agent to run `npx @tanstack/intent install` handles all of this automatically.
