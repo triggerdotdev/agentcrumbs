@@ -3,7 +3,7 @@ export { addSink, removeSink } from "./trail.js";
 export { NOOP } from "./noop.js";
 export { MemorySink } from "./sinks/memory.js";
 export { ConsoleSink } from "./sinks/console.js";
-export { HttpSink, HttpSink as SocketSink } from "./sinks/socket.js";
+export { HttpSink } from "./sinks/socket.js";
 export type {
   TrailFunction,
   Crumb,

@@ -2,10 +2,11 @@ import path from "node:path";
 import os from "node:os";
 import { CrumbStore } from "../../collector/store.js";
 import { formatCrumbPretty, formatCrumbJson } from "../format.js";
+import { getFlag, hasFlag } from "../args.js";
 
 export async function follow(args: string[]): Promise<void> {
   const traceId = getFlag(args, "--trace");
-  const json = args.includes("--json");
+  const json = hasFlag(args, "--json");
 
   if (!traceId) {
     process.stderr.write("Usage: agentcrumbs follow --trace <traceId> [--json]\n");
@@ -37,10 +38,4 @@ export async function follow(args: string[]): Promise<void> {
       process.stdout.write(formatCrumbPretty(crumb) + "\n");
     }
   }
-}
-
-function getFlag(args: string[], flag: string): string | undefined {
-  const idx = args.indexOf(flag);
-  if (idx === -1 || idx + 1 >= args.length) return undefined;
-  return args[idx + 1];
 }

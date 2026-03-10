@@ -9,6 +9,10 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./test": {
+      "import": "./dist/sinks/memory.js",
+      "types": "./dist/sinks/memory.d.ts"
     }
   },
   "bin": {

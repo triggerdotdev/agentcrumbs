@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { getFlag, hasFlag } from "../args.js";
 
 const SINGLE_LINE_MARKER = /\/[/*]\s*@crumbs\s*\*?\/?$/;
 const REGION_START = /^\s*\/\/\s*#region\s+@crumbs\s*$/;
@@ -9,8 +10,8 @@ const DEFAULT_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".mts"];
 const DEFAULT_IGNORE = ["node_modules", "dist", ".git", ".next", ".turbo"];
 
 export async function strip(args: string[]): Promise<void> {
-  const check = args.includes("--check");
-  const dryRun = args.includes("--dry-run");
+  const check = hasFlag(args, "--check");
+  const dryRun = hasFlag(args, "--dry-run");
   const dir = getFlag(args, "--dir") ?? process.cwd();
   const extFlag = getFlag(args, "--ext");
   const extensions = extFlag
@@ -145,10 +146,4 @@ function findFiles(dir: string, extensions: string[]): string[] {
 
   walk(dir);
   return results;
-}
-
-function getFlag(args: string[], flag: string): string | undefined {
-  const idx = args.indexOf(flag);
-  if (idx === -1 || idx + 1 >= args.length) return undefined;
-  return args[idx + 1];
 }

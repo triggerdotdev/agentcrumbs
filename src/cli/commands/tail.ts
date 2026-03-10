@@ -3,21 +3,24 @@ import path from "node:path";
 import os from "node:os";
 import type { Crumb } from "../../types.js";
 import { formatCrumbPretty, formatCrumbJson } from "../format.js";
+import { getFlag, hasFlag } from "../args.js";
 
 export async function tail(args: string[]): Promise<void> {
   const ns = getFlag(args, "--ns");
   const tag = getFlag(args, "--tag");
   const match = getFlag(args, "--match");
   const session = getFlag(args, "--session");
-  const json = args.includes("--json");
+  const json = hasFlag(args, "--json");
 
-  const filePath = path.join(os.homedir(), ".agentcrumbs", "crumbs.jsonl");
+  const dir = path.join(os.homedir(), ".agentcrumbs");
+  const filePath = path.join(dir, "crumbs.jsonl");
 
   if (!fs.existsSync(filePath)) {
-    process.stderr.write(
-      "No crumb file found. Start the collector first: agentcrumbs collect\n"
-    );
-    process.exit(1);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(filePath, "");
+    process.stderr.write("Waiting for crumbs... (start the collector: agentcrumbs collect)\n");
   }
 
   // Print existing lines from the end (last 50)
@@ -122,8 +125,3 @@ function readLastLines(filePath: string, count: number): Crumb[] {
   }
 }
 
-function getFlag(args: string[], flag: string): string | undefined {
-  const idx = args.indexOf(flag);
-  if (idx === -1 || idx + 1 >= args.length) return undefined;
-  return args[idx + 1];
-}
