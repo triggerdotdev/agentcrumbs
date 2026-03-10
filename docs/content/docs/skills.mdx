@@ -30,43 +30,34 @@ Each skill is a Markdown file with YAML frontmatter:
 
 ```yaml
 ---
-name: agentcrumbs/core
+name: agentcrumbs
 description: >
-  Core debug tracing with agentcrumbs: trail(), crumb(),
-  @crumbs markers, env var config, noop strategy...
+  Debug mode for AI coding agents. Drop structured traces inline
+  while writing code, query them when something breaks, strip
+  before merge.
 type: core
 library: agentcrumbs
-library_version: "0.1.0"
+library_version: "0.2.0"
 sources:
+  - "triggerdotdev/agentcrumbs:README.md"
   - "triggerdotdev/agentcrumbs:src/trail.ts"
-  - "triggerdotdev/agentcrumbs:src/env.ts"
 ---
 ```
 
-The content includes correct usage patterns, explicitly flags common mistakes, and defines constraints the agent must follow.
+The content includes correct usage patterns, explicitly flags common mistakes, and points agents to CLI help and docs for deeper discovery.
 
 ## Available skills
 
 | Skill | What it teaches |
 | --- | --- |
+| `agentcrumbs` | Core workflow, API, markers, CLI quick reference, critical mistakes, and pointers to further discovery |
 | `agentcrumbs/init` | Scans repo structure, discovers namespaces, writes config to CLAUDE.md or .cursorrules |
-| `agentcrumbs/core` | `trail()`, `crumb()`, `// @crumbs` markers, `#region @crumbs` blocks, env var, noop guarantee |
-| `agentcrumbs/scopes-and-context` | `scope()`, `wrap()`, `child()`, `snapshot()`, `assert()`, context propagation |
-| `agentcrumbs/sessions-and-tags` | `session()`, tags, grouping crumbs for replay and filtering |
 
-| `agentcrumbs/cli` | `collect`, `tail`, `query`, `strip`, `session`, and other CLI commands |
-
-## What each skill contains
-
-**Patterns.** Correct usage examples the agent can copy. These show the right way to use each API, with proper markers, at module scope, with structured data.
-
-**Common mistakes.** Explicitly marked with severity levels (CRITICAL, HIGH, MEDIUM). Things like: checking `process.env.AGENTCRUMBS` on every call instead of using the noop, creating `trail()` inside request handlers, forgetting `// @crumbs` markers. The agent learns what to avoid, not just what to do.
-
-**Constraints.** Hard rules: every crumb line must have a marker, don't invent namespaces without checking the catalog, create trails at module scope.
+The top-level `agentcrumbs` skill covers the essentials an agent needs to use crumbs correctly: the write-collect-query-strip workflow, core API (`trail`, `crumb`, `child`, `scope`), marker syntax, and the most common mistakes. For deeper functionality like sessions, tags, scopes, and testing patterns, it points agents to CLI help (`agentcrumbs --help`), type definitions, and the docs.
 
 ## The init skill
 
-The `agentcrumbs/init` skill deserves special mention. It's the entry point for setting up agentcrumbs in any project.
+The `agentcrumbs/init` skill is the entry point for setting up agentcrumbs in any project.
 
 When the agent runs init, it:
 
@@ -81,9 +72,8 @@ After init, every agent working in the repo uses the same consistent namespaces.
 If you don't use @tanstack/intent, you can point agents to skills directly:
 
 ```
-skills/agentcrumbs/core/SKILL.md
-skills/agentcrumbs/cli/SKILL.md
-skills/agentcrumbs/init/SKILL.md
+node_modules/agentcrumbs/skills/agentcrumbs/SKILL.md
+node_modules/agentcrumbs/skills/agentcrumbs/init/SKILL.md
 ```
 
 Or add a reference in your agent config file manually. But `npx @tanstack/intent install` handles all of this automatically.

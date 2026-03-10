@@ -29,11 +29,8 @@ agentcrumbs ships with [@tanstack/intent](https://tanstack.com/blog/from-docs-to
 
 | Skill | What it teaches |
 | --- | --- |
+| `agentcrumbs` | Core workflow, API, markers, CLI reference, common mistakes |
 | `agentcrumbs/init` | Scans repo, discovers namespaces, writes config |
-| `agentcrumbs/core` | `trail()`, `crumb()`, markers, env var, noop guarantee |
-| `agentcrumbs/scopes-and-context` | `scope()`, `wrap()`, `child()`, `snapshot()`, `assert()` |
-| `agentcrumbs/sessions-and-tags` | `session()`, tags, grouping and filtering |
-| `agentcrumbs/cli` | `collect`, `tail`, `query`, `strip`, `session` |
 
 Skills travel with the package version. The agent always has docs matching the installed code.
 

@@ -248,7 +248,7 @@ export default function HomePage() {
           </div>
 
           <div className="hp-skills-detail">
-            <p>agentcrumbs ships 5 skills via <a href="https://tanstack.com/blog/from-docs-to-agents" target="_blank">@tanstack/intent</a>, covering the full API, CLI, and common mistakes. Skills travel with the package version, so the agent always has docs matching the installed code.</p>
+            <p>agentcrumbs ships 2 skills via <a href="https://tanstack.com/blog/from-docs-to-agents" target="_blank">@tanstack/intent</a>: one covering the core workflow, API, and common mistakes, and an init skill that sets up your repo. Skills travel with the package version, so the agent always has docs matching the installed code.</p>
             <p>Compatible with Claude Code, Cursor, GitHub Copilot, and any agent that supports the <a href="https://agentskills.io" target="_blank">Agent Skills spec</a>.</p>
           </div>
         </div>
