@@ -1,5 +1,11 @@
 # agentcrumbs
 
+## 0.3.1
+
+### Patch Changes
+
+- 7203600: Fix docs URLs from docs.agentcrumbs.dev to agentcrumbs.dev/docs
+
 ## 0.3.0
 
 ### Minor Changes
