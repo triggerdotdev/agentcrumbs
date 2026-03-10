@@ -14,18 +14,15 @@ Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/crum
 
 ```bash
 npm install agentcrumbs
-npx @tanstack/intent install
 ```
 
-Then tell your agent: **"Run the agentcrumbs/init skill."**
+Then tell your agent: **"Run `npx @tanstack/intent@latest install` to set up agentcrumbs skills, then run the agentcrumbs/init skill."**
 
-The init skill scans your repo, discovers services and modules, and builds a **namespace catalog** that gets written to your agent config (CLAUDE.md, .cursorrules, etc.). Without the catalog, every agent invents its own namespace names: `auth`, `auth-service`, `authService`, `authentication`, all pointing at the same thing. The catalog locks it down. Every agent, every session, same names.
-
-After init, the agent knows which namespaces to use and how to drop crumbs correctly.
+The agent will wire the skills into your agent config (CLAUDE.md, .cursorrules, etc.), then scan your repo to build a namespace catalog so all agents use consistent names.
 
 ## Agent skills
 
-agentcrumbs ships with [@tanstack/intent](https://tanstack.com/blog/from-docs-to-agents) skills inside the npm package. Running `npx @tanstack/intent install` wires them into your agent config so the agent learns correct usage patterns, common mistakes to avoid, and the namespace catalog for your project.
+agentcrumbs ships with [@tanstack/intent](https://tanstack.com/blog/from-docs-to-agents) skills inside the npm package. When your agent runs `npx @tanstack/intent install`, it sets up skill-to-task mappings in your agent config so it knows when to load agentcrumbs patterns.
 
 | Skill | What it teaches |
 | --- | --- |
@@ -87,7 +84,7 @@ The only cost is the function call itself, which V8 will likely inline after war
 
 ## API overview
 
-All methods are documented in detail at [docs.agentcrumbs.dev/api](https://docs.agentcrumbs.dev/api).
+All methods are documented in detail at [agentcrumbs.dev/docs/api](https://agentcrumbs.dev/docs/api).
 
 | Method | Purpose |
 | --- | --- |
@@ -103,7 +100,7 @@ All methods are documented in detail at [docs.agentcrumbs.dev/api](https://docs.
 
 ## Crumb markers
 
-Mark crumb lines with `// @crumbs` (single line) or `// #region @crumbs` / `// #endregion @crumbs` (block) so they can be stripped before merge. See the [markers docs](https://docs.agentcrumbs.dev/markers) for details and examples.
+Mark crumb lines with `// @crumbs` (single line) or `// #region @crumbs` / `// #endregion @crumbs` (block) so they can be stripped before merge. See the [markers docs](https://agentcrumbs.dev/docs/markers) for details and examples.
 
 ## Environment variable
 
@@ -154,7 +151,7 @@ Time units: `s` (seconds), `m` (minutes), `h` (hours), `d` (days).
 
 ## Multi-service architecture
 
-All services write to the same collector. `agentcrumbs tail` shows interleaved output with namespace-colored labels. See the [multi-service docs](https://docs.agentcrumbs.dev/multi-service) for setup patterns.
+All services write to the same collector. `agentcrumbs tail` shows interleaved output with namespace-colored labels. See the [multi-service docs](https://agentcrumbs.dev/docs/multi-service) for setup patterns.
 
 ## Cross-language compatibility
 
@@ -174,7 +171,7 @@ Verified compatible with **Node.js 18+** and **Bun**.
 
 ## Docs
 
-Full documentation at [docs.agentcrumbs.dev](https://docs.agentcrumbs.dev).
+Full documentation at [agentcrumbs.dev/docs](https://agentcrumbs.dev/docs).
 
 ## License
 

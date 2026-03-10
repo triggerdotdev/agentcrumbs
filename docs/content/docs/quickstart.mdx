@@ -9,25 +9,18 @@ description: "Install agentcrumbs and set up your agent in 2 minutes"
 npm install agentcrumbs
 ```
 
-## Wire the skills
+## Set up skills
 
-```bash
-npx @tanstack/intent install
-```
+Tell your agent:
 
-This pulls agentcrumbs' [@tanstack/intent](https://tanstack.com/blog/from-docs-to-agents) skills into your agent config (CLAUDE.md, .cursorrules, etc.).
+> "Run `npx @tanstack/intent@latest install` to set up agentcrumbs skills, then run the agentcrumbs/init skill."
 
-## Run the init skill
+The agent will:
 
-This is the most important step. Tell your agent:
+1. Run `npx @tanstack/intent install` which gives it a prompt to wire skill-to-task mappings into your agent config (CLAUDE.md, .cursorrules, etc.)
+2. Run the [init skill](/skills#the-init-skill) to scan your repo, discover services and modules, and write a namespace catalog to your config
 
-> "Run the agentcrumbs/init skill to set up debug tracing in this project."
-
-The agent scans your repo, discovers services and modules, and proposes a **namespace catalog**: a table of every service name and what it maps to. You confirm or adjust, and the agent writes it to your config file.
-
-Why this matters: without the catalog, every agent invents its own names. One session uses `auth`, another uses `auth-service`, another uses `authentication`. Crumbs become impossible to query across sessions. The catalog locks down the names so every agent, every time, uses the same ones.
-
-After init, the agent knows which namespaces to use and how to drop crumbs correctly. See [Skills](/skills#the-init-skill) for the full details.
+The namespace catalog is a table of service names your agents should use. It keeps naming consistent across sessions. See [Skills](/skills#the-init-skill) for details.
 
 ## Manual setup
 
