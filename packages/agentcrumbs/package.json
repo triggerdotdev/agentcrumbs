@@ -2,21 +2,16 @@
   "name": "agentcrumbs",
   "version": "0.3.1",
   "description": "Debug mode for any agent.",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+  "tshy": {
+    "exports": {
+      ".": "./src/index.ts"
     },
-    "./test": {
-      "import": "./dist/sinks/memory.js",
-      "types": "./dist/sinks/memory.d.ts"
-    }
+    "exclude": [
+      "src/__tests__/**/*"
+    ]
   },
   "bin": {
-    "agentcrumbs": "./dist/cli/index.js",
+    "agentcrumbs": "./dist/esm/cli/index.js",
     "intent": "./bin/intent.js"
   },
   "files": [
@@ -40,14 +35,15 @@
     "docs": "https://agentcrumbs.dev/docs"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tshy",
+    "dev": "tshy --watch",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npx @tanstack/intent@latest validate"
   },
   "devDependencies": {
     "@types/node": "^25.3.3",
+    "tshy": "^3.3.2",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
   },
@@ -65,5 +61,21 @@
     "claude",
     "cursor",
     "copilot"
-  ]
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/index.d.ts",
+        "default": "./dist/commonjs/index.js"
+      }
+    }
+  },
+  "main": "./dist/commonjs/index.js",
+  "types": "./dist/commonjs/index.d.ts",
+  "module": "./dist/esm/index.js"
 }
