@@ -43,7 +43,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npx @tanstack/intent@latest validate"
   },
   "devDependencies": {
     "@types/node": "^25.3.3",
