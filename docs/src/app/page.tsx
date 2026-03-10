@@ -225,9 +225,8 @@ export default function HomePage() {
       {/* SKILLS */}
       <section className="hp-skills">
         <div className="hp-container">
-          <h2>The init skill is the real setup</h2>
-          <p className="hp-section-subtitle">After installing, tell your agent to run <code>agentcrumbs/init</code>. It scans your repo, discovers your services and modules, and builds a <strong>namespace catalog</strong> that gets written to your agent config (CLAUDE.md, .cursorrules, etc.).</p>
-          <p className="hp-section-subtitle">This is the critical step. Without the catalog, every agent invents its own namespace names: <code>auth</code>, <code>auth-service</code>, <code>authService</code>, <code>authentication</code>, all pointing at the same thing. The catalog locks it down. Every agent, every session, same names.</p>
+          <h2>Set up with <code>agentcrumbs/init</code></h2>
+          <p className="hp-section-subtitle">The init skill scans your repo, discovers services and modules, and writes a namespace table to your agent config (CLAUDE.md, .cursorrules, etc.). Agents use the table to pick consistent namespace names across sessions.</p>
 
           <div className="hp-skills-install">
             <div className="hp-code-pane-header" style={{ borderRadius: '8px 8px 0 0' }}>
