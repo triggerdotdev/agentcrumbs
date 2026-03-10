@@ -206,11 +206,11 @@ export default function HomePage() {
           <div className="hp-workflow-flow">
             {['write', 'debug', 'fix', 'strip', 'merge'].map((label, i) => (
               <span key={label} style={{ display: 'contents' }}>
-                <div className="hp-flow-step">
-                  <span className={`hp-flow-dot ${i < 3 ? 'active' : ''}`} />
+                <div className="hp-flow-step" style={{ '--step-index': i } as React.CSSProperties}>
+                  <span className="hp-flow-dot" />
                   <span className="hp-flow-label">{label}</span>
                 </div>
-                {i < 4 && <div className={`hp-flow-line ${i < 2 ? 'active' : ''}`} />}
+                {i < 4 && <div className="hp-flow-line" style={{ '--line-index': i } as React.CSSProperties} />}
               </span>
             ))}
           </div>
