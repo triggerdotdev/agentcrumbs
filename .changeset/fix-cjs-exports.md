@@ -2,4 +2,4 @@
 "agentcrumbs": patch
 ---
 
-Add typesVersions for node10 resolution of subpath exports
+Switch to tshy for dual ESM/CJS builds, remove unused ./test subpath export
