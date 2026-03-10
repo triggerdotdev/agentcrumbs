@@ -1,5 +1,11 @@
 # agentcrumbs
 
+## 0.3.2
+
+### Patch Changes
+
+- 88fe868: Switch to tshy for dual ESM/CJS builds, remove unused ./test subpath export
+
 ## 0.3.1
 
 ### Patch Changes
