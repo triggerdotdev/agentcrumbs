@@ -155,7 +155,10 @@ export default function HomePage() {
             </div>
             <div className="hp-install-step">
               <div className="hp-install-step-num">2</div>
-              <div className="hp-install-step-text">Tell your agent: <span style={{ color: 'var(--hp-text)' }}>&quot;Run npx @tanstack/intent install, then run the agentcrumbs/init skill&quot;</span></div>
+              <div className="hp-install-bar hp-install-bar-agent">
+                <span className="hp-agent-label">agent</span>
+                <code>Run npx @tanstack/intent install, then run the agentcrumbs/init skill</code>
+              </div>
             </div>
           </div>
         </div>

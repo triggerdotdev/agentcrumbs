@@ -75,7 +75,7 @@
 
 /* INSTALL */
 .hp-install-section { padding: 32px 0 64px; }
-.hp-install-steps { display: flex; flex-direction: column; gap: 12px; max-width: 520px; margin: 0 auto; }
+.hp-install-steps { display: flex; flex-direction: column; gap: 12px; max-width: 600px; margin: 0 auto; }
 .hp-install-step { display: flex; align-items: center; gap: 12px; }
 .hp-install-step-num { font-family: var(--hp-mono); font-size: 12px; color: var(--hp-accent); width: 20px; text-align: center; flex-shrink: 0; }
 .hp-install-step-text { font-family: var(--hp-mono); font-size: 14px; color: var(--hp-text-dim); padding: 14px 0; }
@@ -83,6 +83,9 @@
 .hp-install-bar:hover { border-color: #333; }
 .hp-prompt-sign { color: var(--hp-accent); user-select: none; }
 .hp-install-bar code { color: var(--hp-text); white-space: nowrap; background: transparent !important; padding: 0 !important; font-size: inherit; }
+.hp-install-bar-agent { font-size: 14px; }
+.hp-install-bar-agent code { white-space: normal; color: var(--hp-text-dim); }
+.hp-agent-label { color: var(--hp-accent); user-select: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; }
 .hp-copy-btn { background: none; border: 1px solid var(--hp-border-bright); border-radius: 4px; color: var(--hp-text-dim); font-family: var(--hp-mono); font-size: 12px; padding: 4px 10px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .hp-copy-btn:hover { color: var(--hp-text); border-color: #444; }
 
