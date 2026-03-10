@@ -85,7 +85,14 @@ export default function HomePage() {
     <div className="hp">
       {/* NAV */}
       <nav className="hp-nav">
-        <div className="hp-wordmark">agent<span>crumbs</span></div>
+        <div className="hp-nav-left">
+          <div className="hp-wordmark">agent<span>crumbs</span></div>
+          <a href="https://trigger.dev" target="_blank" className="hp-by-trigger">
+            by
+            <svg width="14" height="14" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M41.6889 52.2795L60.4195 20L106.839 100H14L32.7305 67.7195L45.9801 75.3312L40.5003 84.7756H80.3387L60.4195 50.4478L54.9396 59.8922L41.6889 52.2795Z" fill="#A8FF53"/></svg>
+            Trigger.dev
+          </a>
+        </div>
         <div className="hp-nav-links">
           <a href="/docs">Docs</a>
           <a href="https://github.com/triggerdotdev/agentcrumbs" target="_blank">GitHub</a>
@@ -272,8 +279,15 @@ export default function HomePage() {
       <footer className="hp-footer">
         <div className="hp-container">
           <div className="hp-footer-inner">
-            <span>MIT License</span>
-            <a href="https://github.com/triggerdotdev/agentcrumbs" target="_blank">GitHub</a>
+            <a href="https://trigger.dev" target="_blank" className="hp-footer-brand">
+              <svg width="18" height="18" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M41.6889 52.2795L60.4195 20L106.839 100H14L32.7305 67.7195L45.9801 75.3312L40.5003 84.7756H80.3387L60.4195 50.4478L54.9396 59.8922L41.6889 52.2795Z" fill="#A8FF53"/></svg>
+              Built by Trigger.dev
+            </a>
+            <div className="hp-footer-links">
+              <span>MIT License</span>
+              <a href="/docs">Docs</a>
+              <a href="https://github.com/triggerdotdev/agentcrumbs" target="_blank">GitHub</a>
+            </div>
           </div>
         </div>
       </footer>
