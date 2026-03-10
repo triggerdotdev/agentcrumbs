@@ -84,7 +84,7 @@ The only cost is the function call itself, which V8 will likely inline after war
 
 ## API overview
 
-All methods are documented in detail at [docs.agentcrumbs.dev/api](https://docs.agentcrumbs.dev/api).
+All methods are documented in detail at [agentcrumbs.dev/docs/api](https://agentcrumbs.dev/docs/api).
 
 | Method | Purpose |
 | --- | --- |
@@ -100,7 +100,7 @@ All methods are documented in detail at [docs.agentcrumbs.dev/api](https://docs.
 
 ## Crumb markers
 
-Mark crumb lines with `// @crumbs` (single line) or `// #region @crumbs` / `// #endregion @crumbs` (block) so they can be stripped before merge. See the [markers docs](https://docs.agentcrumbs.dev/markers) for details and examples.
+Mark crumb lines with `// @crumbs` (single line) or `// #region @crumbs` / `// #endregion @crumbs` (block) so they can be stripped before merge. See the [markers docs](https://agentcrumbs.dev/docs/markers) for details and examples.
 
 ## Environment variable
 
@@ -151,7 +151,7 @@ Time units: `s` (seconds), `m` (minutes), `h` (hours), `d` (days).
 
 ## Multi-service architecture
 
-All services write to the same collector. `agentcrumbs tail` shows interleaved output with namespace-colored labels. See the [multi-service docs](https://docs.agentcrumbs.dev/multi-service) for setup patterns.
+All services write to the same collector. `agentcrumbs tail` shows interleaved output with namespace-colored labels. See the [multi-service docs](https://agentcrumbs.dev/docs/multi-service) for setup patterns.
 
 ## Cross-language compatibility
 
@@ -171,7 +171,7 @@ Verified compatible with **Node.js 18+** and **Bun**.
 
 ## Docs
 
-Full documentation at [docs.agentcrumbs.dev](https://docs.agentcrumbs.dev).
+Full documentation at [agentcrumbs.dev/docs](https://agentcrumbs.dev/docs).
 
 ## License
 

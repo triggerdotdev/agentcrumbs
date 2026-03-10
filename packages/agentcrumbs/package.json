@@ -37,7 +37,7 @@
   "intent": {
     "version": 1,
     "repo": "triggerdotdev/agentcrumbs",
-    "docs": "https://docs.agentcrumbs.dev"
+    "docs": "https://agentcrumbs.dev/docs"
   },
   "scripts": {
     "build": "tsc",
