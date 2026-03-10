@@ -96,7 +96,7 @@ export default function HomePage() {
       <section className="hp-hero">
         <div className="hp-container">
           <div className="hp-hero-label">For Claude Code, Cursor, Copilot, and any agent</div>
-          <h1>Debug mode for<br />AI agents</h1>
+          <h1>Debug mode for<br />any agent</h1>
           <p>Agents can read your code but they can&apos;t see what happened at runtime. agentcrumbs lets them drop structured traces inline while writing code, then query those traces when something breaks. Stripped before merge, zero cost when off.</p>
         </div>
       </section>

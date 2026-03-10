@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     template: '%s | agentcrumbs',
     default: 'agentcrumbs',
   },
-  description: 'Debug tracing for AI agents',
+  description: 'Debug mode for any agent.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
