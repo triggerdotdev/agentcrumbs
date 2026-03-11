@@ -36,9 +36,10 @@ Tail options:
 
 Query options:
   --since <duration>   Relative time window (e.g., 5m, 1h, 24h)
-  --after <timestamp>  Crumbs after this ISO timestamp (for pagination)
+  --after <timestamp>  Crumbs after this ISO timestamp
   --before <timestamp> Crumbs before this ISO timestamp
-  --limit <n>          Max results per page (default: 50)
+  --cursor <id>        Resume from a previous page (8-char ID from output)
+  --limit <n>          Results per page (default: 50)
   --ns <pattern>       Filter by namespace
   --tag <tag>          Filter by tag
   --session <id>       Filter by session ID

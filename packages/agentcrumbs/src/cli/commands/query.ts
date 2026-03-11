@@ -2,6 +2,7 @@ import type { Crumb } from "../../types.js";
 import { formatCrumbPretty, formatCrumbJson } from "../format.js";
 import { getFlag, hasFlag } from "../args.js";
 import { parseAppFlags, readAllCrumbs } from "../app-store.js";
+import { saveCursor, resolveCursor } from "../cursor.js";
 
 export async function query(args: string[]): Promise<void> {
   const ns = getFlag(args, "--ns");
@@ -9,6 +10,7 @@ export async function query(args: string[]): Promise<void> {
   const since = getFlag(args, "--since");
   const after = getFlag(args, "--after");
   const before = getFlag(args, "--before");
+  const cursor = getFlag(args, "--cursor");
   const session = getFlag(args, "--session");
   const match = getFlag(args, "--match");
   const json = hasFlag(args, "--json");
@@ -64,8 +66,18 @@ export async function query(args: string[]): Promise<void> {
 
   const total = filtered.length;
 
-  // Take first `limit` crumbs (oldest first) for forward pagination
-  const results = filtered.slice(0, limit);
+  // Resolve cursor to skip offset
+  let startIndex = 0;
+  if (cursor) {
+    const entry = resolveCursor(cursor);
+    if (!entry) {
+      process.stderr.write(`Cursor expired or invalid: ${cursor}\n`);
+      process.exit(1);
+    }
+    startIndex = entry.offset;
+  }
+
+  const results = filtered.slice(startIndex, startIndex + limit);
 
   if (results.length === 0) {
     process.stderr.write("No crumbs found matching filters.\n");
@@ -81,14 +93,20 @@ export async function query(args: string[]): Promise<void> {
   }
 
   // Pagination footer
-  const hasMore = total > results.length;
+  const endIndex = startIndex + results.length;
+  const hasMore = endIndex < total;
   if (hasMore) {
     const lastTs = results[results.length - 1]!.ts;
+    const nextCursor = saveCursor(lastTs, endIndex);
     process.stderr.write(
-      `\n${results.length} of ${total} crumbs. Next page: --after ${lastTs}\n`
+      `\n${results.length} crumbs (${startIndex + 1}-${endIndex} of ${total}). Next: --cursor ${nextCursor}\n`
     );
   } else {
-    process.stderr.write(`\n${results.length} crumbs.\n`);
+    if (startIndex > 0) {
+      process.stderr.write(`\n${results.length} crumbs (${startIndex + 1}-${endIndex} of ${total}).\n`);
+    } else {
+      process.stderr.write(`\n${results.length} crumbs.\n`);
+    }
   }
 }
 

@@ -101,8 +101,8 @@ Start broad — query a time window across all namespaces, then paginate if ther
 # Start here: get recent crumbs across all services
 agentcrumbs query --since 5m
 
-# Paginate forward (timestamp from "Next page:" in output)
-agentcrumbs query --since 5m --after 2026-03-11T14:20:00.123Z
+# Paginate forward using the cursor from the output
+agentcrumbs query --since 5m --cursor a1b2c3d4
 
 # Time window with absolute bounds
 agentcrumbs query --after 2026-03-11T14:00:00Z --before 2026-03-11T14:05:00Z
@@ -114,6 +114,8 @@ agentcrumbs query --since 5m --limit 25
 agentcrumbs query --since 5m --tag error
 agentcrumbs query --session a1b2c3
 ```
+
+Results are paginated (50 per page by default). When there are more results, the output includes a `--cursor` ID for the next page. Pass it back to get the next page.
 
 Run `agentcrumbs <command> --help` for detailed options on any command.
 

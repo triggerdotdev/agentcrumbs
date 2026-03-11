@@ -16,8 +16,9 @@ agentcrumbs query --since 5m
 | Flag | Description |
 | --- | --- |
 | `--since <duration>` | Relative time window (e.g., `5m`, `1h`, `24h`, `7d`) |
-| `--after <timestamp>` | Crumbs after this ISO timestamp (cursor for pagination) |
+| `--after <timestamp>` | Crumbs after this ISO timestamp |
 | `--before <timestamp>` | Crumbs before this ISO timestamp |
+| `--cursor <id>` | Resume from a previous page (8-char ID from output) |
 | `--limit <n>` | Results per page (default: 50) |
 | `--ns <pattern>` | Filter by namespace |
 | `--tag <tag>` | Filter by tag |
@@ -31,16 +32,19 @@ Time units: `s` (seconds), `m` (minutes), `h` (hours), `d` (days).
 
 ### Pagination
 
-Results are returned oldest-first, capped at `--limit` (default 50). When there are more results, the output includes a `Next page:` line with an `--after` timestamp you can use to fetch the next page.
+Results are returned oldest-first, capped at `--limit` (default 50). When there are more results, the output includes a short cursor ID for the next page.
 
 ```bash
 # First page
 agentcrumbs query --since 5m
-# Output: 50 of 128 crumbs. Next page: --after 2026-03-11T14:20:00.123Z
+# Output: 50 crumbs (1-50 of 128). Next: --cursor a1b2c3d4
 
 # Next page
-agentcrumbs query --since 5m --after 2026-03-11T14:20:00.123Z
+agentcrumbs query --since 5m --cursor a1b2c3d4
+# Output: 50 crumbs (51-100 of 128). Next: --cursor e5f6g7h8
 ```
+
+Cursors expire after 1 hour. You can also use `--after` / `--before` with ISO timestamps for explicit time windows without cursors.
 
 ### Examples
 
@@ -48,10 +52,13 @@ agentcrumbs query --since 5m --after 2026-03-11T14:20:00.123Z
 # Last 5 minutes (all namespaces)
 agentcrumbs query --since 5m
 
+# Paginate through results
+agentcrumbs query --since 5m --cursor a1b2c3d4
+
 # Time window with absolute timestamps
 agentcrumbs query --after 2026-03-11T14:00:00Z --before 2026-03-11T14:05:00Z
 
-# Paginate through results
+# Smaller pages
 agentcrumbs query --since 1h --limit 25
 
 # Filter by session
