@@ -49,7 +49,8 @@ export type TrailFunction = {
     name: string,
     fn: (ctx: ScopeContext) => T | Promise<T>
   ) => T | Promise<T>;
-  wrap: <T extends (...args: unknown[]) => unknown>(name: string, fn: T) => T;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  wrap: <T extends (...args: any[]) => any>(name: string, fn: T) => T;
   time: (label: string) => void;
   timeEnd: (label: string, data?: unknown) => void;
   snapshot: (label: string, obj: unknown) => void;

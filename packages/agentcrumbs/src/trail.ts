@@ -215,7 +215,8 @@ function createTrailFunction(
     }
   };
 
-  fn.wrap = <T extends (...args: unknown[]) => unknown>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fn.wrap = <T extends (...args: any[]) => any>(
     name: string,
     wrappedFn: T
   ): T => {
