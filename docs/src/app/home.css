@@ -42,6 +42,9 @@
 .hp-hero { padding: 80px 0 48px; text-align: center; }
 .hp-hero-label { font-family: var(--hp-mono); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--hp-accent); margin-bottom: 16px; }
 .hp-hero h1 { font-family: var(--hp-title); font-size: clamp(32px, 5vw, 56px); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 20px; }
+.hp-typewriter { color: var(--hp-accent); }
+.hp-cursor { display: inline-block; width: 3px; height: 0.9em; background: var(--hp-accent); margin-left: 2px; vertical-align: baseline; animation: blink 0.6s step-end infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 .hp-hero p { font-size: 18px; color: var(--hp-text-dim); max-width: 640px; margin: 0 auto; line-height: 1.6; font-weight: 300; }
 
 /* CODE BLOCK */

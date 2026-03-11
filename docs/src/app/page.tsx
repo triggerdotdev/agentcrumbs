@@ -1,7 +1,7 @@
 'use client';
 
 import './home.css';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 function copyCmd(id: string, btn: HTMLButtonElement) {
   const el = document.getElementById(id);
@@ -10,6 +10,36 @@ function copyCmd(id: string, btn: HTMLButtonElement) {
     btn.textContent = 'copied';
     setTimeout(() => { btn.textContent = 'copy'; }, 1500);
   });
+}
+
+const AGENTS = ['Claude Code', 'Cursor', 'Codex', 'Copilot', 'Goose', 'Amp', 'any agent'];
+
+function TypewriterAgent() {
+  const [index, setIndex] = useState(0);
+  const [text, setText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const word = AGENTS[index];
+
+  useEffect(() => {
+    if (!deleting && text === word) {
+      const pause = index === AGENTS.length - 1 ? 4000 : 2000;
+      const timer = setTimeout(() => setDeleting(true), pause);
+      return () => clearTimeout(timer);
+    }
+    if (deleting && text === '') {
+      setDeleting(false);
+      setIndex((i) => (i + 1) % AGENTS.length);
+      return;
+    }
+    const speed = deleting ? 40 : 80;
+    const timer = setTimeout(() => {
+      setText(deleting ? word.slice(0, text.length - 1) : word.slice(0, text.length + 1));
+    }, speed);
+    return () => clearTimeout(timer);
+  }, [text, deleting, word, index]);
+
+  return <span className="hp-typewriter">{text}<span className="hp-cursor" /></span>;
 }
 
 function CodeTabs() {
@@ -102,8 +132,7 @@ export default function HomePage() {
       {/* HERO */}
       <section className="hp-hero">
         <div className="hp-container">
-          <div className="hp-hero-label">For Claude Code, Cursor, Copilot, and any agent</div>
-          <h1>Debug mode for<br />any agent</h1>
+          <h1>Debug mode for<br /><TypewriterAgent /></h1>
           <p>Agents can read your code but they can&apos;t see what happened at runtime. agentcrumbs lets them drop structured traces inline while writing code, then query those traces when something breaks. Stripped before merge, zero cost when off.</p>
         </div>
       </section>
