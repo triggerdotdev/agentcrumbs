@@ -1,5 +1,6 @@
 node_modules
 dist
+.tshy
 *.tsbuildinfo
 .DS_Store
 .env
