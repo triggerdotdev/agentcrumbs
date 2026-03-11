@@ -1,5 +1,11 @@
 # agentcrumbs
 
+## 0.3.3
+
+### Patch Changes
+
+- e7ca8bf: Format crumb data on the same line as the message instead of a separate line
+
 ## 0.3.2
 
 ### Patch Changes
