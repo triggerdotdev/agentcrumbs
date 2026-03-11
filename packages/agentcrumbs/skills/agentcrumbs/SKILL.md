@@ -83,7 +83,7 @@ agentcrumbs tail              # Live tail (auto-scoped to current app)
 agentcrumbs tail --app foo    # Tail a specific app
 agentcrumbs tail --all-apps   # Tail all apps
 agentcrumbs query --since 5m  # Query last 5 minutes (all namespaces, 50 per page)
-agentcrumbs query --since 5m --after <timestamp>  # Next page
+agentcrumbs query --since 5m --cursor <id>  # Next page (cursor from output)
 agentcrumbs clear             # Clear crumbs for current app
 agentcrumbs clear --all-apps  # Clear crumbs for all apps
 agentcrumbs strip             # Remove all crumb markers from source
@@ -95,27 +95,33 @@ Most commands accept `--app <name>` and `--all-apps`. Default is auto-detect fro
 
 ## Querying crumbs
 
-Start broad — query a time window across all namespaces, then paginate if there are too many results. Do NOT filter by namespace or match text unless you are looking for something very specific. The whole point of crumbs is seeing the full picture across services.
+**IMPORTANT: Query broadly, paginate — don't filter narrowly.** The value of crumbs is seeing what happened across ALL services, not just one. Filtering to a single namespace or adding match filters defeats the purpose — you'll miss the cross-service interactions that reveal the real bug.
+
+The right approach:
+1. Query a time window with no namespace filter
+2. Read the first page of results
+3. Use `--cursor` to paginate forward if you need more
 
 ```bash
-# Start here: get recent crumbs across all services
+# CORRECT: broad query, paginate through results
 agentcrumbs query --since 5m
+agentcrumbs query --since 5m --cursor a1b2c3d4   # cursor from previous output
 
-# Paginate forward using the cursor from the output
-agentcrumbs query --since 5m --cursor a1b2c3d4
+# CORRECT: narrow the time window, not the namespaces
+agentcrumbs query --after 2026-03-11T14:00:00Z --before 2026-03-11T14:01:00Z
 
-# Time window with absolute bounds
-agentcrumbs query --after 2026-03-11T14:00:00Z --before 2026-03-11T14:05:00Z
-
-# Smaller pages if context is tight
+# CORRECT: smaller pages to save context
 agentcrumbs query --since 5m --limit 25
 
-# Only filter by namespace/match when you have a specific reason
-agentcrumbs query --since 5m --tag error
+# CORRECT: filter by session (still shows all namespaces in that session)
 agentcrumbs query --session a1b2c3
+
+# AVOID: don't filter to one namespace unless you already know the root cause
+# agentcrumbs query --since 5m --ns auth-service     # too narrow!
+# agentcrumbs query --since 5m --match "userId:123"   # too narrow!
 ```
 
-Results are paginated (50 per page by default). When there are more results, the output includes a `--cursor` ID for the next page. Pass it back to get the next page.
+Results are paginated (50 per page by default). When there are more results, the output includes a short `--cursor` ID for the next page.
 
 Run `agentcrumbs <command> --help` for detailed options on any command.
 
@@ -148,9 +154,10 @@ agentcrumbs stats --all-apps     # Per-app statistics
 
 ## Critical mistakes
 
-1. **Missing markers** — Every crumb line needs `// @crumbs` or a `#region @crumbs` block. Without them, `strip` can't clean up.
-2. **Creating trail() in hot paths** — `trail()` parses the env var each call. Create once at module scope, use `child()` for per-request context.
-3. **No collector running** — Without `agentcrumbs collect`, crumbs go to stderr only and can't be queried. Start the collector before reproducing issues.
+1. **Over-filtering queries** — Do NOT add `--ns` or `--match` filters to narrow results. Use `--limit` and `--cursor` to paginate instead. Filtering to one namespace hides cross-service bugs. If there are too many results, narrow the time window or reduce `--limit`, not the namespaces.
+2. **Missing markers** — Every crumb line needs `// @crumbs` or a `#region @crumbs` block. Without them, `strip` can't clean up.
+3. **Creating trail() in hot paths** — `trail()` parses the env var each call. Create once at module scope, use `child()` for per-request context.
+4. **No collector running** — Without `agentcrumbs collect`, crumbs go to stderr only and can't be queried. Start the collector before reproducing issues.
 
 ## Further discovery
 

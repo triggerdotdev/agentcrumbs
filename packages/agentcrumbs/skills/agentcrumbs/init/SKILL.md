@@ -141,13 +141,16 @@ production.
 ### CLI
 
 ```bash
-AGENTCRUMBS=1 node app.js        # enable tracing (or AGENTCRUMBS_APP=my-project)
-agentcrumbs collect               # start collector (multi-service)
-agentcrumbs tail                  # live tail (scoped to this app)
-agentcrumbs tail --app my-project # tail a specific app
-agentcrumbs clear                 # clear crumbs for this app
-agentcrumbs strip                 # remove crumbs before merge
+AGENTCRUMBS=1 node app.js              # enable tracing
+agentcrumbs collect                     # start collector
+agentcrumbs tail                        # live tail (scoped to this app)
+agentcrumbs query --since 5m            # query recent crumbs (all namespaces)
+agentcrumbs query --since 5m --cursor <id>  # paginate (cursor from output)
+agentcrumbs clear                       # clear crumbs for this app
+agentcrumbs strip                       # remove crumbs before merge
 ```
+
+When querying, always start broad (all namespaces) and paginate with `--cursor`. Do not filter by `--ns` or `--match` — the value is in seeing the full cross-service picture.
 ````
 
 Adapt the example above to the actual discovered namespaces and app name.
