@@ -15,7 +15,7 @@ export async function collect(args: string[]): Promise<void> {
 
   server.on("crumb", (crumb: Crumb) => {
     if (!quiet) {
-      process.stdout.write(formatCrumbPretty(crumb) + "\n");
+      process.stdout.write(formatCrumbPretty(crumb, { showApp: true }) + "\n");
     }
   });
 
@@ -25,10 +25,9 @@ export async function collect(args: string[]): Promise<void> {
 
   await server.start();
 
-  const store = server.getStore();
   process.stdout.write(`agentcrumbs collector\n`);
   process.stdout.write(`  http:  http://localhost:${port}/crumb\n`);
-  process.stdout.write(`  store: ${store.getFilePath()}\n`);
+  process.stdout.write(`  crumbs stored per-app in ~/.agentcrumbs/<app>/\n`);
   process.stdout.write(`  press ctrl+c to stop\n\n`);
 
   const shutdown = () => {
@@ -40,4 +39,3 @@ export async function collect(args: string[]): Promise<void> {
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
 }
-

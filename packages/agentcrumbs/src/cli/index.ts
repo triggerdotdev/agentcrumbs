@@ -54,8 +54,13 @@ Strip options:
   --dir <path>         Directory to scan (default: cwd)
   --ext <list>         File extensions (default: .ts,.tsx,.js,.jsx,.mjs,.mts)
 
+App filtering (available on most commands):
+  --app <name>         Scope to a specific app (default: auto-detect from package.json)
+  --all-apps           Show crumbs from all apps
+
 Environment:
   AGENTCRUMBS          Enable debug tracing (see docs for format)
+  AGENTCRUMBS_APP      Override app name (default: auto-detect from package.json)
 `;
 
 async function main(): Promise<void> {

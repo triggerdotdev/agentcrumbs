@@ -67,6 +67,15 @@ you have a reasonable set (typically 3–15 namespaces):
 - Match existing conventions in the repo if they exist
 - Group related subsystems with prefixes: `db-queries`, `db-migrations`
 
+### Determine the app name
+
+The app name identifies this project in crumb storage and CLI filtering.
+Read the root `package.json` `name` field (strip any `@scope/` prefix).
+This is what gets stamped on every crumb as the `app` field.
+
+If the repo is a monorepo, use the root package name (not individual
+workspace packages — those become namespaces, not apps).
+
 ### What to capture for each namespace
 
 For each namespace, record:
@@ -78,12 +87,13 @@ For each namespace, record:
 
 ## Phase 2 — Ask the maintainer
 
-Present your discovered namespaces to the maintainer and ask:
+Present the app name and discovered namespaces to the maintainer and ask:
 
-1. "Here are the namespaces I found. Should I add, remove, or rename any?"
-2. "Are there any cross-cutting concerns I should add?" (e.g., `cron`,
+1. "The app name is `<name>` (from package.json). Is that correct?"
+2. "Here are the namespaces I found. Should I add, remove, or rename any?"
+3. "Are there any cross-cutting concerns I should add?" (e.g., `cron`,
    `migrations`, `external-api`, `auth`, `billing`)
-3. "Which agent config file should I write to — CLAUDE.md or AGENTS.md?"
+4. "Which agent config file should I write to — CLAUDE.md or AGENTS.md?"
 
 Wait for their response before proceeding.
 
@@ -102,6 +112,8 @@ The output should look like this:
 
 ````markdown
 ## agentcrumbs
+
+App: `my-project`
 
 Add crumbs as you write code — not just when debugging. Mark lines with
 `// @crumbs` or wrap blocks in `// #region @crumbs`. They stay on the
@@ -129,14 +141,18 @@ production.
 ### CLI
 
 ```bash
-agentcrumbs collect    # start collector (multi-service)
-agentcrumbs tail       # live tail
-agentcrumbs strip      # remove crumbs before merge
+AGENTCRUMBS=1 node app.js        # enable tracing (or AGENTCRUMBS_APP=my-project)
+agentcrumbs collect               # start collector (multi-service)
+agentcrumbs tail                  # live tail (scoped to this app)
+agentcrumbs tail --app my-project # tail a specific app
+agentcrumbs clear                 # clear crumbs for this app
+agentcrumbs strip                 # remove crumbs before merge
 ```
 ````
 
-Adapt the example above to the actual discovered namespaces. Drop the
-Path column if namespaces don't have meaningful directory paths.
+Adapt the example above to the actual discovered namespaces and app name.
+Drop the Path column if namespaces don't have meaningful directory paths.
+Replace `my-project` with the actual app name detected from `package.json`.
 
 ---
 

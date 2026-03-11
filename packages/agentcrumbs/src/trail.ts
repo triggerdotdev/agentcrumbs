@@ -9,7 +9,7 @@ import type {
   TrailFunction,
 } from "./types.js";
 import { NOOP } from "./noop.js";
-import { isNamespaceEnabled, getCollectorUrl, getFormat } from "./env.js";
+import { isNamespaceEnabled, getCollectorUrl, getFormat, getApp } from "./env.js";
 import { getContext, runWithContext, type DebugContext } from "./context.js";
 import { ConsoleSink } from "./sinks/console.js";
 import { HttpSink } from "./sinks/socket.js";
@@ -100,6 +100,7 @@ function createTrailFunction(
     const cliSession = getCliSessionId();
 
     const crumb: Crumb = {
+      app: getApp(),
       ts: new Date().toISOString(),
       ns: namespace,
       msg,

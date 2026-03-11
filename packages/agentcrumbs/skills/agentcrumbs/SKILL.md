@@ -79,12 +79,18 @@ const result = await crumb.scope("operation", async (ctx) => {
 
 ```bash
 agentcrumbs collect           # Start HTTP collector (required for query/tail)
-agentcrumbs tail              # Live tail (--ns, --tag, --match filters)
+agentcrumbs tail              # Live tail (auto-scoped to current app)
+agentcrumbs tail --app foo    # Tail a specific app
+agentcrumbs tail --all-apps   # Tail all apps
 agentcrumbs query --since 5m  # Query history (--ns, --tag, --session, --json)
+agentcrumbs clear             # Clear crumbs for current app
+agentcrumbs clear --all-apps  # Clear crumbs for all apps
 agentcrumbs strip             # Remove all crumb markers from source
 agentcrumbs strip --check     # CI gate — exits 1 if markers found
 agentcrumbs --help            # Full command reference
 ```
+
+Most commands accept `--app <name>` and `--all-apps`. Default is auto-detect from `package.json`.
 
 Run `agentcrumbs <command> --help` for detailed options on any command.
 
@@ -96,6 +102,24 @@ AGENTCRUMBS='{"ns":"auth-*"}' node app.js  # Filter by namespace
 ```
 
 When `AGENTCRUMBS` is not set, `trail()` returns a frozen noop. No conditionals, no overhead.
+
+## App isolation
+
+Every crumb is stamped with an `app` name. This keeps crumbs from different projects separate — storage, CLI queries, and tail all scope to the current app by default.
+
+**App name resolution** (first match wins):
+1. `app` field in `AGENTCRUMBS` JSON config: `AGENTCRUMBS='{"app":"my-app","ns":"*"}'`
+2. `AGENTCRUMBS_APP` env var
+3. Auto-detected from the nearest `package.json` name field
+
+Crumbs are stored per-app at `~/.agentcrumbs/<app>/crumbs.jsonl`.
+
+```bash
+agentcrumbs tail                 # Scoped to current app (auto-detected)
+agentcrumbs tail --app my-app    # Scope to a specific app
+agentcrumbs tail --all-apps      # See crumbs from all apps
+agentcrumbs stats --all-apps     # Per-app statistics
+```
 
 ## Critical mistakes
 

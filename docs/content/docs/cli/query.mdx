@@ -20,6 +20,8 @@ agentcrumbs query --since 5m
 | `--tag <tag>` | Filter by tag |
 | `--session <id>` | Filter by session ID |
 | `--match <text>` | Text search |
+| `--app <name>` | Scope to a specific app (default: auto-detect from package.json) |
+| `--all-apps` | Query crumbs from all apps |
 | `--json` | JSON output |
 | `--limit <n>` | Maximum number of results |
 
@@ -45,4 +47,10 @@ agentcrumbs query --since 1h --json --limit 50
 
 # Text search
 agentcrumbs query --since 24h --match "connection refused"
+
+# Query a specific app
+agentcrumbs query --since 1h --app my-project
+
+# Query across all apps
+agentcrumbs query --since 5m --all-apps
 ```

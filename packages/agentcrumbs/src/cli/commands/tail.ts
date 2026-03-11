@@ -1,9 +1,8 @@
 import fs from "node:fs";
-import path from "node:path";
-import os from "node:os";
 import type { Crumb } from "../../types.js";
 import { formatCrumbPretty, formatCrumbJson } from "../format.js";
 import { getFlag, hasFlag } from "../args.js";
+import { parseAppFlags, getStoreFilePath } from "../app-store.js";
 
 export async function tail(args: string[]): Promise<void> {
   const ns = getFlag(args, "--ns");
@@ -11,9 +10,11 @@ export async function tail(args: string[]): Promise<void> {
   const match = getFlag(args, "--match");
   const session = getFlag(args, "--session");
   const json = hasFlag(args, "--json");
+  const appCtx = parseAppFlags(args);
+  const showApp = appCtx.allApps;
 
-  const dir = path.join(os.homedir(), ".agentcrumbs");
-  const filePath = path.join(dir, "crumbs.jsonl");
+  const filePath = getStoreFilePath(appCtx);
+  const dir = filePath.replace(/\/[^/]+$/, "");
 
   if (!fs.existsSync(filePath)) {
     if (!fs.existsSync(dir)) {
@@ -27,7 +28,7 @@ export async function tail(args: string[]): Promise<void> {
   const existing = readLastLines(filePath, 50);
   for (const crumb of existing) {
     if (matchesCrumb(crumb, { ns, tag, match, session })) {
-      printCrumb(crumb, json);
+      printCrumb(crumb, json, showApp);
     }
   }
 
@@ -53,7 +54,7 @@ export async function tail(args: string[]): Promise<void> {
         try {
           const crumb = JSON.parse(line) as Crumb;
           if (matchesCrumb(crumb, { ns, tag, match, session })) {
-            printCrumb(crumb, json);
+            printCrumb(crumb, json, showApp);
           }
         } catch {
           // skip invalid lines
@@ -98,11 +99,11 @@ function matchesCrumb(crumb: Crumb, filters: Filters): boolean {
   return true;
 }
 
-function printCrumb(crumb: Crumb, json: boolean): void {
+function printCrumb(crumb: Crumb, json: boolean, showApp: boolean): void {
   if (json) {
     process.stdout.write(formatCrumbJson(crumb) + "\n");
   } else {
-    process.stdout.write(formatCrumbPretty(crumb) + "\n");
+    process.stdout.write(formatCrumbPretty(crumb, { showApp }) + "\n");
   }
 }
 
@@ -124,4 +125,3 @@ function readLastLines(filePath: string, count: number): Crumb[] {
     return [];
   }
 }
-

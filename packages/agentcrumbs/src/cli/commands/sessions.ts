@@ -1,18 +1,16 @@
-import path from "node:path";
-import os from "node:os";
 import fs from "node:fs";
-import { CrumbStore } from "../../collector/store.js";
+import { parseAppFlags, readAllCrumbs } from "../app-store.js";
 
 const SESSION_FILE = "/tmp/agentcrumbs.session";
 
-export async function sessions(_args: string[]): Promise<void> {
-  const store = new CrumbStore(path.join(os.homedir(), ".agentcrumbs"));
-  const allCrumbs = store.readAll();
+export async function sessions(args: string[]): Promise<void> {
+  const appCtx = parseAppFlags(args);
+  const allCrumbs = readAllCrumbs(appCtx);
 
   // Find all sessions from crumbs
   const sessionMap = new Map<
     string,
-    { name: string; startedAt: string; endedAt?: string; count: number }
+    { name: string; app?: string; startedAt: string; endedAt?: string; count: number }
   >();
 
   for (const crumb of allCrumbs) {
@@ -22,6 +20,7 @@ export async function sessions(_args: string[]): Promise<void> {
     if (!existing) {
       sessionMap.set(crumb.sid, {
         name: crumb.type === "session:start" ? crumb.msg : "unknown",
+        app: crumb.app,
         startedAt: crumb.ts,
         endedAt: crumb.type === "session:end" ? crumb.ts : undefined,
         count: 1,
@@ -63,11 +62,20 @@ export async function sessions(_args: string[]): Promise<void> {
     return;
   }
 
+  const showApp = appCtx.allApps;
+
   // Print header
-  process.stdout.write(
-    `${"ID".padEnd(10)} ${"Name".padEnd(25)} ${"Duration".padEnd(12)} ${"Crumbs".padEnd(8)} Status\n`
-  );
-  process.stdout.write("-".repeat(70) + "\n");
+  if (showApp) {
+    process.stdout.write(
+      `${"ID".padEnd(10)} ${"App".padEnd(20)} ${"Name".padEnd(25)} ${"Duration".padEnd(12)} ${"Crumbs".padEnd(8)} Status\n`
+    );
+    process.stdout.write("-".repeat(90) + "\n");
+  } else {
+    process.stdout.write(
+      `${"ID".padEnd(10)} ${"Name".padEnd(25)} ${"Duration".padEnd(12)} ${"Crumbs".padEnd(8)} Status\n`
+    );
+    process.stdout.write("-".repeat(70) + "\n");
+  }
 
   for (const [id, info] of sessionMap) {
     const isActive = id === activeSessionId;
@@ -80,9 +88,15 @@ export async function sessions(_args: string[]): Promise<void> {
         : "?";
     const status = isActive ? "active" : info.endedAt ? "stopped" : "?";
 
-    process.stdout.write(
-      `${id.padEnd(10)} ${info.name.padEnd(25)} ${duration.padEnd(12)} ${String(info.count).padEnd(8)} ${status}\n`
-    );
+    if (showApp) {
+      process.stdout.write(
+        `${id.padEnd(10)} ${(info.app ?? "unknown").padEnd(20)} ${info.name.padEnd(25)} ${duration.padEnd(12)} ${String(info.count).padEnd(8)} ${status}\n`
+      );
+    } else {
+      process.stdout.write(
+        `${id.padEnd(10)} ${info.name.padEnd(25)} ${duration.padEnd(12)} ${String(info.count).padEnd(8)} ${status}\n`
+      );
+    }
   }
 }
 

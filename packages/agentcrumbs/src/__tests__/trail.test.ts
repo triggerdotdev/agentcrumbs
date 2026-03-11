@@ -1,15 +1,17 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { trail, addSink, removeSink, resetSinks } from "../trail.js";
-import { resetConfig } from "../env.js";
+import { resetConfig, resetApp } from "../env.js";
 import { MemorySink } from "../sinks/memory.js";
 import { NOOP } from "../noop.js";
 
 describe("trail", () => {
   const originalEnv = process.env.AGENTCRUMBS;
+  const originalAppEnv = process.env.AGENTCRUMBS_APP;
   let sink: MemorySink;
 
   beforeEach(() => {
     resetConfig();
+    resetApp();
     resetSinks();
     sink = new MemorySink();
     addSink(sink);
@@ -21,7 +23,13 @@ describe("trail", () => {
     } else {
       process.env.AGENTCRUMBS = originalEnv;
     }
+    if (originalAppEnv === undefined) {
+      delete process.env.AGENTCRUMBS_APP;
+    } else {
+      process.env.AGENTCRUMBS_APP = originalAppEnv;
+    }
     resetConfig();
+    resetApp();
     resetSinks();
   });
 
@@ -98,6 +106,8 @@ describe("trail", () => {
 
       expect(sink.entries).toHaveLength(1);
       const entry = sink.entries[0]!;
+      expect(entry.app).toBeDefined();
+      expect(typeof entry.app).toBe("string");
       expect(entry.ns).toBe("test");
       expect(entry.msg).toBe("hello");
       expect(entry.data).toEqual({ key: "value" });
@@ -334,6 +344,69 @@ describe("trail", () => {
       expect(result).toBe(5);
       expect(sink.entries.some((e) => e.type === "scope:enter" && e.msg === "add")).toBe(true);
       expect(sink.entries.some((e) => e.type === "scope:exit" && e.msg === "add")).toBe(true);
+    });
+  });
+
+  describe("app", () => {
+    beforeEach(() => {
+      process.env.AGENTCRUMBS = "1";
+      resetConfig();
+      resetApp();
+    });
+
+    it("stamps every crumb with app field", () => {
+      const crumb = trail("test");
+      crumb("hello");
+
+      expect(sink.entries).toHaveLength(1);
+      expect(sink.entries[0]!.app).toBeDefined();
+      expect(typeof sink.entries[0]!.app).toBe("string");
+      expect(sink.entries[0]!.app.length).toBeGreaterThan(0);
+    });
+
+    it("uses AGENTCRUMBS_APP env var", () => {
+      process.env.AGENTCRUMBS_APP = "my-test-app";
+      resetApp();
+
+      const crumb = trail("test");
+      crumb("hello");
+
+      expect(sink.entries[0]!.app).toBe("my-test-app");
+    });
+
+    it("uses app from JSON config", () => {
+      process.env.AGENTCRUMBS = '{"app":"json-app","ns":"*"}';
+      resetConfig();
+      resetApp();
+
+      const crumb = trail("test");
+      crumb("hello");
+
+      expect(sink.entries[0]!.app).toBe("json-app");
+    });
+
+    it("JSON config app takes priority over env var", () => {
+      process.env.AGENTCRUMBS = '{"app":"json-app","ns":"*"}';
+      process.env.AGENTCRUMBS_APP = "env-app";
+      resetConfig();
+      resetApp();
+
+      const crumb = trail("test");
+      crumb("hello");
+
+      expect(sink.entries[0]!.app).toBe("json-app");
+    });
+
+    it("auto-detects from package.json when no explicit app", () => {
+      delete process.env.AGENTCRUMBS_APP;
+      resetApp();
+
+      const crumb = trail("test");
+      crumb("hello");
+
+      // Should find the agentcrumbs package.json
+      expect(sink.entries[0]!.app).toBeDefined();
+      expect(sink.entries[0]!.app).not.toBe("unknown");
     });
   });
 });

@@ -1,9 +1,7 @@
-import path from "node:path";
-import os from "node:os";
 import type { Crumb } from "../../types.js";
-import { CrumbStore } from "../../collector/store.js";
 import { formatCrumbPretty, formatCrumbJson } from "../format.js";
 import { getFlag, hasFlag } from "../args.js";
+import { parseAppFlags, readAllCrumbs } from "../app-store.js";
 
 export async function query(args: string[]): Promise<void> {
   const ns = getFlag(args, "--ns");
@@ -13,9 +11,10 @@ export async function query(args: string[]): Promise<void> {
   const match = getFlag(args, "--match");
   const json = hasFlag(args, "--json");
   const limit = parseInt(getFlag(args, "--limit") ?? "100", 10);
+  const appCtx = parseAppFlags(args);
+  const showApp = appCtx.allApps;
 
-  const store = new CrumbStore(path.join(os.homedir(), ".agentcrumbs"));
-  const allCrumbs = store.readAll();
+  const allCrumbs = readAllCrumbs(appCtx);
 
   let filtered = allCrumbs;
 
@@ -52,7 +51,7 @@ export async function query(args: string[]): Promise<void> {
     if (json) {
       process.stdout.write(formatCrumbJson(crumb) + "\n");
     } else {
-      process.stdout.write(formatCrumbPretty(crumb) + "\n");
+      process.stdout.write(formatCrumbPretty(crumb, { showApp }) + "\n");
     }
   }
 
@@ -79,4 +78,3 @@ function parseSince(since: string): number {
 
   return Date.now() - value * multipliers[unit]!;
 }
-

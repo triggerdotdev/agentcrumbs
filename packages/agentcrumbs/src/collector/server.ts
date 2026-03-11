@@ -8,13 +8,23 @@ const SESSION_FILE = "/tmp/agentcrumbs.session";
 
 export class CollectorServer extends EventEmitter {
   private server: http.Server | undefined;
-  private store: CrumbStore;
+  private stores = new Map<string, CrumbStore>();
+  private baseDir: string | undefined;
   private port: number;
 
   constructor(port: number, storeDir?: string) {
     super();
     this.port = port;
-    this.store = new CrumbStore(storeDir);
+    this.baseDir = storeDir;
+  }
+
+  private getStoreForApp(app: string): CrumbStore {
+    let store = this.stores.get(app);
+    if (!store) {
+      store = CrumbStore.forApp(app, this.baseDir);
+      this.stores.set(app, store);
+    }
+    return store;
   }
 
   start(): Promise<void> {
@@ -31,11 +41,12 @@ export class CollectorServer extends EventEmitter {
         }
 
         if (req.url === "/health" && req.method === "GET") {
+          const apps = CrumbStore.listApps(this.baseDir);
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify({
             status: "ok",
             port: this.port,
-            store: this.store.getFilePath(),
+            apps,
             session: this.getActiveSession() ?? null,
           }));
           return;
@@ -49,7 +60,9 @@ export class CollectorServer extends EventEmitter {
           req.on("end", () => {
             try {
               const crumb = JSON.parse(body) as Crumb;
-              this.store.appendRaw(body);
+              const app = crumb.app || "unknown";
+              const store = this.getStoreForApp(app);
+              store.appendRaw(body);
               this.emit("crumb", crumb);
               res.writeHead(200);
               res.end("ok");
@@ -81,11 +94,10 @@ export class CollectorServer extends EventEmitter {
       this.server.close();
       this.server = undefined;
     }
-    this.store.close();
-  }
-
-  getStore(): CrumbStore {
-    return this.store;
+    for (const store of this.stores.values()) {
+      store.close();
+    }
+    this.stores.clear();
   }
 
   getPort(): number {

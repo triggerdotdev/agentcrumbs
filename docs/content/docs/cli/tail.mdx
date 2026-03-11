@@ -19,6 +19,8 @@ agentcrumbs tail
 | `--tag <tag>` | Filter by tag |
 | `--match <text>` | Filter by content |
 | `--session <id>` | Filter by session ID |
+| `--app <name>` | Scope to a specific app (default: auto-detect from package.json) |
+| `--all-apps` | Show crumbs from all apps |
 | `--json` | JSON output (for piping to jq, etc.) |
 
 ### Examples
@@ -36,6 +38,12 @@ agentcrumbs tail --match "userId:123"
 
 # Filter by session
 agentcrumbs tail --session a1b2c3
+
+# Scope to a specific app
+agentcrumbs tail --app my-project
+
+# Show crumbs from all apps
+agentcrumbs tail --all-apps
 
 # JSON output for piping
 agentcrumbs tail --json | jq '.data.userId'

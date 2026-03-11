@@ -43,15 +43,34 @@ AGENTCRUMBS='{"ns":"*","port":9999}'
 
 # JSON output format (instead of pretty)
 AGENTCRUMBS='{"ns":"*","format":"json"}'
+
+# Explicit app name
+AGENTCRUMBS='{"app":"my-project","ns":"*"}'
 ```
 
 ## Config schema
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
+| `app` | `string` | (auto-detect) | App name. Defaults to nearest `package.json` name |
 | `ns` | `string` | (required) | Namespace filter pattern |
 | `port` | `number` | `8374` | Collector HTTP port |
 | `format` | `"pretty"` \| `"json"` | `"pretty"` | Output format for stderr |
+
+## App name
+
+Every crumb is stamped with an app name. This keeps crumbs from different projects separate.
+
+The app name is resolved in this order:
+1. `app` field in the JSON config
+2. `AGENTCRUMBS_APP` environment variable
+3. Auto-detected from the nearest `package.json` name field (walking up from `cwd`)
+4. Fallback: `"unknown"`
+
+```bash
+# Override via dedicated env var
+AGENTCRUMBS_APP=my-project AGENTCRUMBS=1 node app.js
+```
 
 ## Namespace patterns
 
