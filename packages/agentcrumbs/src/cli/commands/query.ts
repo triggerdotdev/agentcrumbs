@@ -7,10 +7,12 @@ export async function query(args: string[]): Promise<void> {
   const ns = getFlag(args, "--ns");
   const tag = getFlag(args, "--tag");
   const since = getFlag(args, "--since");
+  const after = getFlag(args, "--after");
+  const before = getFlag(args, "--before");
   const session = getFlag(args, "--session");
   const match = getFlag(args, "--match");
   const json = hasFlag(args, "--json");
-  const limit = parseInt(getFlag(args, "--limit") ?? "100", 10);
+  const limit = parseInt(getFlag(args, "--limit") ?? "50", 10);
   const appCtx = parseAppFlags(args);
   const showApp = appCtx.allApps;
 
@@ -18,11 +20,31 @@ export async function query(args: string[]): Promise<void> {
 
   let filtered = allCrumbs;
 
+  // Time window filters
   if (since) {
     const cutoff = parseSince(since);
     filtered = filtered.filter((c) => new Date(c.ts).getTime() >= cutoff);
   }
 
+  if (after) {
+    const afterMs = new Date(after).getTime();
+    if (isNaN(afterMs)) {
+      process.stderr.write(`Invalid --after timestamp: "${after}". Use ISO 8601 format.\n`);
+      process.exit(1);
+    }
+    filtered = filtered.filter((c) => new Date(c.ts).getTime() > afterMs);
+  }
+
+  if (before) {
+    const beforeMs = new Date(before).getTime();
+    if (isNaN(beforeMs)) {
+      process.stderr.write(`Invalid --before timestamp: "${before}". Use ISO 8601 format.\n`);
+      process.exit(1);
+    }
+    filtered = filtered.filter((c) => new Date(c.ts).getTime() < beforeMs);
+  }
+
+  // Content filters
   if (ns) {
     const pattern = new RegExp(`^${ns.replace(/\*/g, ".*")}$`);
     filtered = filtered.filter((c) => pattern.test(c.ns));
@@ -40,7 +62,10 @@ export async function query(args: string[]): Promise<void> {
     filtered = filtered.filter((c) => JSON.stringify(c).includes(match));
   }
 
-  const results = filtered.slice(-limit);
+  const total = filtered.length;
+
+  // Take first `limit` crumbs (oldest first) for forward pagination
+  const results = filtered.slice(0, limit);
 
   if (results.length === 0) {
     process.stderr.write("No crumbs found matching filters.\n");
@@ -55,7 +80,16 @@ export async function query(args: string[]): Promise<void> {
     }
   }
 
-  process.stderr.write(`\n${results.length} crumbs found.\n`);
+  // Pagination footer
+  const hasMore = total > results.length;
+  if (hasMore) {
+    const lastTs = results[results.length - 1]!.ts;
+    process.stderr.write(
+      `\n${results.length} of ${total} crumbs. Next page: --after ${lastTs}\n`
+    );
+  } else {
+    process.stderr.write(`\n${results.length} crumbs.\n`);
+  }
 }
 
 function parseSince(since: string): number {

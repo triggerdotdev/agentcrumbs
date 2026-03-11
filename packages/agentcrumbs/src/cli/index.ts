@@ -35,12 +35,14 @@ Tail options:
   --json               Output as JSON
 
 Query options:
-  --since <duration>   Time filter (e.g., 5m, 1h, 24h)
+  --since <duration>   Relative time window (e.g., 5m, 1h, 24h)
+  --after <timestamp>  Crumbs after this ISO timestamp (for pagination)
+  --before <timestamp> Crumbs before this ISO timestamp
+  --limit <n>          Max results per page (default: 50)
   --ns <pattern>       Filter by namespace
   --tag <tag>          Filter by tag
   --session <id>       Filter by session ID
   --match <text>       Filter by text content
-  --limit <n>          Max results (default: 100)
   --json               Output as JSON
 
 Collect options:

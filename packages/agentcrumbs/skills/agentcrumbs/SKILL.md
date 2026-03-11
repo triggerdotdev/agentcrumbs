@@ -82,7 +82,8 @@ agentcrumbs collect           # Start HTTP collector (required for query/tail)
 agentcrumbs tail              # Live tail (auto-scoped to current app)
 agentcrumbs tail --app foo    # Tail a specific app
 agentcrumbs tail --all-apps   # Tail all apps
-agentcrumbs query --since 5m  # Query history (--ns, --tag, --session, --json)
+agentcrumbs query --since 5m  # Query last 5 minutes (all namespaces, 50 per page)
+agentcrumbs query --since 5m --after <timestamp>  # Next page
 agentcrumbs clear             # Clear crumbs for current app
 agentcrumbs clear --all-apps  # Clear crumbs for all apps
 agentcrumbs strip             # Remove all crumb markers from source
@@ -91,6 +92,28 @@ agentcrumbs --help            # Full command reference
 ```
 
 Most commands accept `--app <name>` and `--all-apps`. Default is auto-detect from `package.json`.
+
+## Querying crumbs
+
+Start broad — query a time window across all namespaces, then paginate if there are too many results. Do NOT filter by namespace or match text unless you are looking for something very specific. The whole point of crumbs is seeing the full picture across services.
+
+```bash
+# Start here: get recent crumbs across all services
+agentcrumbs query --since 5m
+
+# Paginate forward (timestamp from "Next page:" in output)
+agentcrumbs query --since 5m --after 2026-03-11T14:20:00.123Z
+
+# Time window with absolute bounds
+agentcrumbs query --after 2026-03-11T14:00:00Z --before 2026-03-11T14:05:00Z
+
+# Smaller pages if context is tight
+agentcrumbs query --since 5m --limit 25
+
+# Only filter by namespace/match when you have a specific reason
+agentcrumbs query --since 5m --tag error
+agentcrumbs query --session a1b2c3
+```
 
 Run `agentcrumbs <command> --help` for detailed options on any command.
 
