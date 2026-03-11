@@ -11,7 +11,7 @@ The collector is an HTTP server that receives crumbs via `POST /crumb` and write
 agentcrumbs collect
 # agentcrumbs collector
 #   http:  http://localhost:8374/crumb
-#   store: ~/.agentcrumbs/crumbs.jsonl
+#   crumbs stored per-app in ~/.agentcrumbs/<app>/
 #   press ctrl+c to stop
 ```
 
@@ -50,8 +50,8 @@ agentcrumbs collect --quiet
 
 1. Listens on the specified port for `POST /crumb` requests
 2. Validates the JSON body matches the crumb schema
-3. Appends each crumb as a line to `crumbs.jsonl`
-4. The `tail` and `query` commands read from this file
+3. Routes each crumb to per-app storage at `~/.agentcrumbs/<app>/crumbs.jsonl`
+4. The `tail` and `query` commands read from these files
 
 ### Without the collector
 

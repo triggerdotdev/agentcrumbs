@@ -7,7 +7,7 @@ Crumbs are development-only. They get stripped before merge and cost nothing whe
 ```
 Service A ──┐                                ┌── $ agentcrumbs tail
 Service B ──┤── fetch() ──> Collector :8374 ──┤── $ agentcrumbs query --since 5m
-Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/crumbs.jsonl
+Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/<app>/crumbs.jsonl
 ```
 
 ## Getting started
@@ -54,7 +54,7 @@ When something goes wrong, the agent starts the collector and queries the trail:
 ```bash
 agentcrumbs collect --quiet &
 AGENTCRUMBS=1 node app.js
-agentcrumbs query --since 5m --ns auth-service
+agentcrumbs query --since 5m
 ```
 
 ```
@@ -62,6 +62,8 @@ auth-service  login attempt       +0ms  { tokenPrefix: "eyJhbGci" }
 auth-service  token decode ok     +3ms  { userId: "u_8f3k" }
 auth-service  permissions check   +8ms  { roles: [] }
 auth-service  rejected: no roles  +8ms  { status: 401 }
+
+4 crumbs.
 ```
 
 Now the agent knows: the token is valid, but the user has no roles. The fix is in role assignment, not token validation.
@@ -114,8 +116,11 @@ Everything is controlled by a single `AGENTCRUMBS` environment variable.
 | `auth-*,api-*` | Multiple patterns (comma or space separated) |
 | `* -internal-*` | Match all except excluded patterns |
 | `{"ns":"*","port":9999}` | JSON config with full control |
+| `{"app":"my-app","ns":"*"}` | Explicit app name |
 
-JSON config fields: `ns` (namespace filter, required), `port` (collector port, default 8374), `format` (`"pretty"` or `"json"`, default `"pretty"`).
+JSON config fields: `app` (app name, default auto-detect from package.json), `ns` (namespace filter, required), `port` (collector port, default 8374), `format` (`"pretty"` or `"json"`, default `"pretty"`).
+
+You can also set `AGENTCRUMBS_APP` to override the app name independently.
 
 ## CLI
 
@@ -127,15 +132,17 @@ agentcrumbs collect --quiet &        # Start in background
 agentcrumbs collect --port 9999      # Custom port
 
 # Live tail
-agentcrumbs tail                     # All namespaces
+agentcrumbs tail                     # All namespaces (scoped to current app)
 agentcrumbs tail --ns auth-service   # Filter by namespace
-agentcrumbs tail --tag perf          # Filter by tag
+agentcrumbs tail --app my-app        # Tail a specific app
+agentcrumbs tail --all-apps          # Tail all apps
 
-# Query
-agentcrumbs query --since 5m        # Last 5 minutes
-agentcrumbs query --ns auth-service --since 1h
-agentcrumbs query --tag root-cause
-agentcrumbs query --json --limit 50
+# Query (paginated, 50 per page)
+agentcrumbs query --since 5m         # Last 5 minutes
+agentcrumbs query --since 5m --cursor a1b2c3d4  # Next page
+agentcrumbs query --since 1h --limit 25          # Smaller pages
+agentcrumbs query --session a1b2c3   # Filter by session
+agentcrumbs query --tag root-cause   # Filter by tag
 
 # Strip
 agentcrumbs strip --dry-run          # Preview removals
@@ -143,8 +150,9 @@ agentcrumbs strip                    # Remove all crumb code
 agentcrumbs strip --check            # CI gate (exits 1 if markers found)
 
 # Utilities
-agentcrumbs stats                    # Crumb counts, file size
-agentcrumbs clear                    # Delete stored crumbs
+agentcrumbs stats                    # Crumb counts (current app)
+agentcrumbs stats --all-apps         # Stats for all apps
+agentcrumbs clear                    # Clear crumbs (current app)
 ```
 
 Time units: `s` (seconds), `m` (minutes), `h` (hours), `d` (days).
@@ -160,7 +168,7 @@ The collector is language-agnostic. Any language with HTTP support can send crum
 ```bash
 curl -X POST http://localhost:8374/crumb \
   -H "Content-Type: application/json" \
-  -d '{"ts":"2026-01-01T00:00:00Z","ns":"shell","msg":"hello","type":"crumb","dt":0,"pid":1}'
+  -d '{"app":"my-app","ts":"2026-01-01T00:00:00Z","ns":"shell","msg":"hello","type":"crumb","dt":0,"pid":1}'
 ```
 
 ## Runtime compatibility

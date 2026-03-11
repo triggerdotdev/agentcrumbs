@@ -10,6 +10,7 @@ export type CrumbType =
   | "session:end";
 
 export type Crumb = {
+  app: string;
   ts: string;
   ns: string;
   msg: string;
@@ -72,6 +73,7 @@ export type Formatter = {
 };
 
 export type AgentCrumbsConfig = {
+  app?: string;
   ns: string;
   port?: number;
   format?: "pretty" | "json";

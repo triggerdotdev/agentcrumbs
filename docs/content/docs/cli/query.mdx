@@ -5,7 +5,7 @@ description: "Search historical crumbs"
 
 ## `agentcrumbs query`
 
-Query historical crumbs with time ranges and filters.
+Query historical crumbs with time windows and cursor-based pagination.
 
 ```bash
 agentcrumbs query --since 5m
@@ -15,34 +15,61 @@ agentcrumbs query --since 5m
 
 | Flag | Description |
 | --- | --- |
-| `--since <duration>` | Time range (e.g., `5m`, `1h`, `24h`, `7d`) |
+| `--since <duration>` | Relative time window (e.g., `5m`, `1h`, `24h`, `7d`) |
+| `--after <timestamp>` | Crumbs after this ISO timestamp |
+| `--before <timestamp>` | Crumbs before this ISO timestamp |
+| `--cursor <id>` | Resume from a previous page (8-char ID from output) |
+| `--limit <n>` | Results per page (default: 50) |
 | `--ns <pattern>` | Filter by namespace |
 | `--tag <tag>` | Filter by tag |
 | `--session <id>` | Filter by session ID |
 | `--match <text>` | Text search |
+| `--app <name>` | Scope to a specific app (default: auto-detect from package.json) |
+| `--all-apps` | Query crumbs from all apps |
 | `--json` | JSON output |
-| `--limit <n>` | Maximum number of results |
 
 Time units: `s` (seconds), `m` (minutes), `h` (hours), `d` (days).
+
+### Pagination
+
+Results are returned oldest-first, capped at `--limit` (default 50). When there are more results, the output includes a short cursor ID for the next page.
+
+```bash
+# First page
+agentcrumbs query --since 5m
+# Output: 50 crumbs (1-50 of 128). Next: --cursor a1b2c3d4
+
+# Next page
+agentcrumbs query --since 5m --cursor a1b2c3d4
+# Output: 50 crumbs (51-100 of 128). Next: --cursor e5f6g7h8
+```
+
+Cursors expire after 1 hour. You can also use `--after` / `--before` with ISO timestamps for explicit time windows without cursors.
 
 ### Examples
 
 ```bash
-# Last 5 minutes
+# Last 5 minutes (all namespaces)
 agentcrumbs query --since 5m
 
-# Last hour, filtered by namespace
-agentcrumbs query --since 1h --ns auth-service
+# Paginate through results
+agentcrumbs query --since 5m --cursor a1b2c3d4
 
-# Filter by tag
-agentcrumbs query --tag root-cause
+# Time window with absolute timestamps
+agentcrumbs query --after 2026-03-11T14:00:00Z --before 2026-03-11T14:05:00Z
+
+# Smaller pages
+agentcrumbs query --since 1h --limit 25
 
 # Filter by session
 agentcrumbs query --session a1b2c3
 
-# JSON output with limit
-agentcrumbs query --since 1h --json --limit 50
+# Filter by tag
+agentcrumbs query --tag root-cause
 
-# Text search
-agentcrumbs query --since 24h --match "connection refused"
+# Query a specific app
+agentcrumbs query --since 1h --app my-project
+
+# Query across all apps
+agentcrumbs query --since 5m --all-apps
 ```

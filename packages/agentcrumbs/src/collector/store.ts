@@ -3,7 +3,7 @@ import path from "node:path";
 import os from "node:os";
 import type { Crumb } from "../types.js";
 
-const DEFAULT_DIR = path.join(os.homedir(), ".agentcrumbs");
+const DEFAULT_BASE = path.join(os.homedir(), ".agentcrumbs");
 const DEFAULT_FILE = "crumbs.jsonl";
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB before rotation
 
@@ -12,11 +12,56 @@ export class CrumbStore {
   private fd: number | undefined;
 
   constructor(dir?: string) {
-    const storeDir = dir ?? DEFAULT_DIR;
+    const storeDir = dir ?? DEFAULT_BASE;
     if (!fs.existsSync(storeDir)) {
       fs.mkdirSync(storeDir, { recursive: true });
     }
     this.filePath = path.join(storeDir, DEFAULT_FILE);
+  }
+
+  static forApp(app: string, baseDir?: string): CrumbStore {
+    const base = baseDir ?? DEFAULT_BASE;
+    return new CrumbStore(path.join(base, app));
+  }
+
+  static listApps(baseDir?: string): string[] {
+    const base = baseDir ?? DEFAULT_BASE;
+    try {
+      const entries = fs.readdirSync(base, { withFileTypes: true });
+      return entries
+        .filter((e) => e.isDirectory())
+        .map((e) => e.name)
+        .sort();
+    } catch {
+      return [];
+    }
+  }
+
+  static readAllApps(baseDir?: string): Crumb[] {
+    const apps = CrumbStore.listApps(baseDir);
+    const allCrumbs: Crumb[] = [];
+    for (const app of apps) {
+      const store = CrumbStore.forApp(app, baseDir);
+      allCrumbs.push(...store.readAll());
+    }
+    // Also read legacy flat file if it exists
+    const base = baseDir ?? DEFAULT_BASE;
+    const legacyPath = path.join(base, DEFAULT_FILE);
+    try {
+      if (fs.existsSync(legacyPath)) {
+        const legacy = new CrumbStore(base);
+        const legacyCrumbs = legacy.readAll();
+        // Tag legacy crumbs missing app field
+        for (const crumb of legacyCrumbs) {
+          if (!crumb.app) crumb.app = "unknown";
+          allCrumbs.push(crumb);
+        }
+      }
+    } catch {
+      // ignore
+    }
+    allCrumbs.sort((a, b) => a.ts.localeCompare(b.ts));
+    return allCrumbs;
   }
 
   private ensureFd(): number {

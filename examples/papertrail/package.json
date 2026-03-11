@@ -1,0 +1,17 @@
+{
+  "name": "papertrail",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "dev:debug": "AGENTCRUMBS=1 tsx src/index.ts"
+  },
+  "dependencies": {
+    "agentcrumbs": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

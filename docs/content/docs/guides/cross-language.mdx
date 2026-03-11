@@ -13,6 +13,7 @@ Send a `POST` request to `http://localhost:8374/crumb` with a JSON body matching
 
 | Field | Type | Description |
 | --- | --- | --- |
+| `app` | `string` | App name (used for per-app storage routing) |
 | `ts` | `string` | ISO 8601 timestamp |
 | `ns` | `string` | Namespace |
 | `msg` | `string` | Message |
@@ -38,7 +39,7 @@ Send a `POST` request to `http://localhost:8374/crumb` with a JSON body matching
 ```bash
 curl -X POST http://localhost:8374/crumb \
   -H "Content-Type: application/json" \
-  -d '{"ts":"2026-01-01T00:00:00Z","ns":"shell","msg":"hello","type":"crumb","dt":0,"pid":1}'
+  -d '{"app":"my-app","ts":"2026-01-01T00:00:00Z","ns":"shell","msg":"hello","type":"crumb","dt":0,"pid":1}'
 ```
 
 ### Python
@@ -50,6 +51,7 @@ from datetime import datetime
 def crumb(ns, msg, data=None):
     try:
         requests.post("http://localhost:8374/crumb", json={
+            "app": "my-app",
             "ts": datetime.utcnow().isoformat() + "Z",
             "ns": ns,
             "msg": msg,
@@ -69,6 +71,7 @@ crumb("python-service", "processing started", {"items": 42})
 ```go
 func crumb(ns, msg string, data any) {
     body, _ := json.Marshal(map[string]any{
+        "app":  "my-app",
         "ts":   time.Now().UTC().Format(time.RFC3339Nano),
         "ns":   ns,
         "msg":  msg,
@@ -86,6 +89,7 @@ func crumb(ns, msg string, data any) {
 ```rust
 fn crumb(ns: &str, msg: &str) {
     let body = serde_json::json!({
+        "app": "my-app",
         "ts": chrono::Utc::now().to_rfc3339(),
         "ns": ns,
         "msg": msg,

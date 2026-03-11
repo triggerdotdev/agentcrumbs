@@ -79,12 +79,49 @@ const result = await crumb.scope("operation", async (ctx) => {
 
 ```bash
 agentcrumbs collect           # Start HTTP collector (required for query/tail)
-agentcrumbs tail              # Live tail (--ns, --tag, --match filters)
-agentcrumbs query --since 5m  # Query history (--ns, --tag, --session, --json)
+agentcrumbs tail              # Live tail (auto-scoped to current app)
+agentcrumbs tail --app foo    # Tail a specific app
+agentcrumbs tail --all-apps   # Tail all apps
+agentcrumbs query --since 5m  # Query last 5 minutes (all namespaces, 50 per page)
+agentcrumbs query --since 5m --cursor <id>  # Next page (cursor from output)
+agentcrumbs clear             # Clear crumbs for current app
+agentcrumbs clear --all-apps  # Clear crumbs for all apps
 agentcrumbs strip             # Remove all crumb markers from source
 agentcrumbs strip --check     # CI gate — exits 1 if markers found
 agentcrumbs --help            # Full command reference
 ```
+
+Most commands accept `--app <name>` and `--all-apps`. Default is auto-detect from `package.json`.
+
+## Querying crumbs
+
+**IMPORTANT: Query broadly, paginate — don't filter narrowly.** The value of crumbs is seeing what happened across ALL services, not just one. Filtering to a single namespace or adding match filters defeats the purpose — you'll miss the cross-service interactions that reveal the real bug.
+
+The right approach:
+1. Query a time window with no namespace filter
+2. Read the first page of results
+3. Use `--cursor` to paginate forward if you need more
+
+```bash
+# CORRECT: broad query, paginate through results
+agentcrumbs query --since 5m
+agentcrumbs query --since 5m --cursor a1b2c3d4   # cursor from previous output
+
+# CORRECT: narrow the time window, not the namespaces
+agentcrumbs query --after 2026-03-11T14:00:00Z --before 2026-03-11T14:01:00Z
+
+# CORRECT: smaller pages to save context
+agentcrumbs query --since 5m --limit 25
+
+# CORRECT: filter by session (still shows all namespaces in that session)
+agentcrumbs query --session a1b2c3
+
+# AVOID: don't filter to one namespace unless you already know the root cause
+# agentcrumbs query --since 5m --ns auth-service     # too narrow!
+# agentcrumbs query --since 5m --match "userId:123"   # too narrow!
+```
+
+Results are paginated (50 per page by default). When there are more results, the output includes a short `--cursor` ID for the next page.
 
 Run `agentcrumbs <command> --help` for detailed options on any command.
 
@@ -97,11 +134,30 @@ AGENTCRUMBS='{"ns":"auth-*"}' node app.js  # Filter by namespace
 
 When `AGENTCRUMBS` is not set, `trail()` returns a frozen noop. No conditionals, no overhead.
 
+## App isolation
+
+Every crumb is stamped with an `app` name. This keeps crumbs from different projects separate — storage, CLI queries, and tail all scope to the current app by default.
+
+**App name resolution** (first match wins):
+1. `app` field in `AGENTCRUMBS` JSON config: `AGENTCRUMBS='{"app":"my-app","ns":"*"}'`
+2. `AGENTCRUMBS_APP` env var
+3. Auto-detected from the nearest `package.json` name field
+
+Crumbs are stored per-app at `~/.agentcrumbs/<app>/crumbs.jsonl`.
+
+```bash
+agentcrumbs tail                 # Scoped to current app (auto-detected)
+agentcrumbs tail --app my-app    # Scope to a specific app
+agentcrumbs tail --all-apps      # See crumbs from all apps
+agentcrumbs stats --all-apps     # Per-app statistics
+```
+
 ## Critical mistakes
 
-1. **Missing markers** — Every crumb line needs `// @crumbs` or a `#region @crumbs` block. Without them, `strip` can't clean up.
-2. **Creating trail() in hot paths** — `trail()` parses the env var each call. Create once at module scope, use `child()` for per-request context.
-3. **No collector running** — Without `agentcrumbs collect`, crumbs go to stderr only and can't be queried. Start the collector before reproducing issues.
+1. **Over-filtering queries** — Do NOT add `--ns` or `--match` filters to narrow results. Use `--limit` and `--cursor` to paginate instead. Filtering to one namespace hides cross-service bugs. If there are too many results, narrow the time window or reduce `--limit`, not the namespaces.
+2. **Missing markers** — Every crumb line needs `// @crumbs` or a `#region @crumbs` block. Without them, `strip` can't clean up.
+3. **Creating trail() in hot paths** — `trail()` parses the env var each call. Create once at module scope, use `child()` for per-request context.
+4. **No collector running** — Without `agentcrumbs collect`, crumbs go to stderr only and can't be queried. Start the collector before reproducing issues.
 
 ## Further discovery
 

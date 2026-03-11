@@ -14,7 +14,7 @@ Crumbs are development-only. They get stripped before merge and cost nothing whe
 ```
 Service A ──┐                                ┌── $ agentcrumbs tail
 Service B ──┤── fetch() ──> Collector :8374 ──┤── $ agentcrumbs query --since 5m
-Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/crumbs.jsonl
+Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/<app>/crumbs.jsonl
 ```
 
 ## Why agents need this

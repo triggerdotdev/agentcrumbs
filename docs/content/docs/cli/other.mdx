@@ -3,20 +3,25 @@ title: "Other commands"
 description: "stats, clear, follow, replay, sessions"
 ---
 
+All commands below accept `--app <name>` to scope to a specific app and `--all-apps` to include all apps. Default is auto-detect from `package.json`.
+
 ## `agentcrumbs stats`
 
 Show crumb counts, file size, and active services.
 
 ```bash
-agentcrumbs stats
+agentcrumbs stats              # current app
+agentcrumbs stats --all-apps   # per-app breakdown
 ```
 
 ## `agentcrumbs clear`
 
-Delete all stored crumbs.
+Delete stored crumbs.
 
 ```bash
-agentcrumbs clear
+agentcrumbs clear              # clear current app
+agentcrumbs clear --all-apps   # clear all apps
+agentcrumbs clear --app foo    # clear a specific app
 ```
 
 ## `agentcrumbs sessions`

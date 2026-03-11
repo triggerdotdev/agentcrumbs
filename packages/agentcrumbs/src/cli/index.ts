@@ -35,12 +35,15 @@ Tail options:
   --json               Output as JSON
 
 Query options:
-  --since <duration>   Time filter (e.g., 5m, 1h, 24h)
+  --since <duration>   Relative time window (e.g., 5m, 1h, 24h)
+  --after <timestamp>  Crumbs after this ISO timestamp
+  --before <timestamp> Crumbs before this ISO timestamp
+  --cursor <id>        Resume from a previous page (8-char ID from output)
+  --limit <n>          Results per page (default: 50)
   --ns <pattern>       Filter by namespace
   --tag <tag>          Filter by tag
   --session <id>       Filter by session ID
   --match <text>       Filter by text content
-  --limit <n>          Max results (default: 100)
   --json               Output as JSON
 
 Collect options:
@@ -54,8 +57,13 @@ Strip options:
   --dir <path>         Directory to scan (default: cwd)
   --ext <list>         File extensions (default: .ts,.tsx,.js,.jsx,.mjs,.mts)
 
+App filtering (available on most commands):
+  --app <name>         Scope to a specific app (default: auto-detect from package.json)
+  --all-apps           Show crumbs from all apps
+
 Environment:
   AGENTCRUMBS          Enable debug tracing (see docs for format)
+  AGENTCRUMBS_APP      Override app name (default: auto-detect from package.json)
 `;
 
 async function main(): Promise<void> {

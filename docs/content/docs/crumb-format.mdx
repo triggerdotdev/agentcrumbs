@@ -9,6 +9,7 @@ Each crumb is a JSON object. When stored, they are written as JSONL (one JSON ob
 
 ```json
 {
+  "app": "my-project",
   "ts": "2026-03-07T10:00:00.123Z",
   "ns": "auth-service",
   "msg": "user logged in",
@@ -28,6 +29,7 @@ Each crumb is a JSON object. When stored, they are written as JSONL (one JSON ob
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
+| `app` | `string` | Yes | App name (auto-detected from `package.json` or explicit config) |
 | `ts` | `string` | Yes | ISO 8601 timestamp |
 | `ns` | `string` | Yes | Namespace |
 | `msg` | `string` | Yes | Message |
@@ -57,4 +59,4 @@ Each crumb is a JSON object. When stored, they are written as JSONL (one JSON ob
 
 ## Storage
 
-Crumbs are stored in `~/.agentcrumbs/crumbs.jsonl` by default. One JSON object per line, no trailing comma, no wrapping array.
+Crumbs are stored per-app at `~/.agentcrumbs/<app>/crumbs.jsonl`. One JSON object per line, no trailing comma, no wrapping array. The app name is auto-detected from the nearest `package.json` by default.

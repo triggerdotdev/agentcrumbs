@@ -258,6 +258,7 @@ export default function HomePage() {
             </div>
             <div className="hp-skills-config">
               <div className="hp-skills-config-heading">## agentcrumbs</div>
+              <div className="hp-skills-config-note" style={{ marginBottom: '8px' }}>App: <code>my-project</code></div>
               <div className="hp-skills-config-heading">### Namespaces</div>
               <table className="hp-skills-table">
                 <thead>

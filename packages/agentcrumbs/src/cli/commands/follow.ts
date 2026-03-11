@@ -1,21 +1,19 @@
-import path from "node:path";
-import os from "node:os";
-import { CrumbStore } from "../../collector/store.js";
 import { formatCrumbPretty, formatCrumbJson } from "../format.js";
 import { getFlag, hasFlag } from "../args.js";
+import { parseAppFlags, readAllCrumbs } from "../app-store.js";
 
 export async function follow(args: string[]): Promise<void> {
   const traceId = getFlag(args, "--trace");
   const json = hasFlag(args, "--json");
+  const appCtx = parseAppFlags(args);
+  const showApp = appCtx.allApps;
 
   if (!traceId) {
-    process.stderr.write("Usage: agentcrumbs follow --trace <traceId> [--json]\n");
+    process.stderr.write("Usage: agentcrumbs follow --trace <traceId> [--app <name>] [--all-apps] [--json]\n");
     process.exit(1);
   }
 
-  const store = new CrumbStore(path.join(os.homedir(), ".agentcrumbs"));
-  const allCrumbs = store.readAll();
-
+  const allCrumbs = readAllCrumbs(appCtx);
   const traceCrumbs = allCrumbs.filter((c) => c.traceId === traceId);
 
   if (traceCrumbs.length === 0) {
@@ -35,7 +33,7 @@ export async function follow(args: string[]): Promise<void> {
     if (json) {
       process.stdout.write(formatCrumbJson(crumb) + "\n");
     } else {
-      process.stdout.write(formatCrumbPretty(crumb) + "\n");
+      process.stdout.write(formatCrumbPretty(crumb, { showApp }) + "\n");
     }
   }
 }
