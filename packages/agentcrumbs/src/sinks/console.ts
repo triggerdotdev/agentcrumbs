@@ -10,7 +10,7 @@ function formatDelta(dt: number): string {
 
 function formatData(data: unknown): string {
   if (data === undefined || data === null) return "";
-  return inspect(data, { colors: true, compact: true, depth: 4, breakLength: 120 });
+  return inspect(data, { colors: true, compact: true, depth: 4, breakLength: Infinity });
 }
 
 function indent(depth: number): string {
@@ -62,7 +62,7 @@ export class ConsoleSink implements Sink {
 
     const dataStr = formatData(crumb.data);
     if (dataStr) {
-      line += `\n${pad}  ${dataStr}`;
+      line += ` ${dataStr}`;
     }
 
     process.stderr.write(line + "\n");
