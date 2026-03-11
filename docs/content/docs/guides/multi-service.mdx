@@ -10,13 +10,13 @@ agentcrumbs is designed for systems with multiple services running locally.
 ```
 Service A ──┐                                ┌── $ agentcrumbs tail
 Service B ──┤── fetch() ──> Collector :8374 ──┤── $ agentcrumbs query --since 5m
-Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/crumbs.jsonl
+Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/<app>/crumbs.jsonl
 ```
 
 1. Each service imports `agentcrumbs` and calls `trail()` to create namespaced trail functions
 2. When `AGENTCRUMBS` is set, crumbs are sent via HTTP to the collector
-3. The collector writes crumbs to a shared JSONL file
-4. The CLI reads from the JSONL file to provide tail, query, and replay
+3. The collector routes crumbs to per-app storage at `~/.agentcrumbs/<app>/crumbs.jsonl`
+4. The CLI reads from these files to provide tail, query, and replay (auto-scoped to current app)
 
 ## Setup
 
