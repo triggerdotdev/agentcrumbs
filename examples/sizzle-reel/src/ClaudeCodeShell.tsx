@@ -6,6 +6,7 @@ type ClaudeCodeShellProps = {
   scrollY?: number;
   inputText?: string;
   showInput?: boolean;
+  frame?: number;
 };
 
 export const ClaudeCodeShell: React.FC<ClaudeCodeShellProps> = ({
@@ -13,7 +14,10 @@ export const ClaudeCodeShell: React.FC<ClaudeCodeShellProps> = ({
   scrollY = 0,
   inputText = "",
   showInput = false,
+  frame = 0,
 }) => {
+  // Cost ticks up over time
+  const cost = (0.0001 + frame * 0.000008).toFixed(4);
   return (
     <div
       style={{
@@ -144,7 +148,7 @@ export const ClaudeCodeShell: React.FC<ClaudeCodeShellProps> = ({
           <span>{" (shift+tab to cycle)"}</span>
         </div>
         <div>
-          papertrail | Opus 4.6 (1M context) | $0.0042
+          papertrail | Opus 4.6 (1M context) | ${cost}
         </div>
       </div>
     </div>

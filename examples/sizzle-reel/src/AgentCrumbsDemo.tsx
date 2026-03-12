@@ -1,6 +1,8 @@
 import {
   AbsoluteFill,
   useCurrentFrame,
+  interpolate,
+  Sequence,
 } from "remotion";
 import { theme, fonts } from "./theme";
 import {
@@ -12,6 +14,83 @@ import {
 } from "./ClaudeCodeShell";
 import { CrumbLine } from "./CrumbLine";
 import { SyntaxLine, lineLength, type Token } from "./SyntaxLine";
+
+// ── Intro card ──────────────────────────────────────────────────────
+const INTRO_FRAMES = 74; // ~2.5s
+
+const Intro: React.FC = () => {
+  const frame = useCurrentFrame();
+
+  const prefix = "Debug mode for ";
+  const accent = "any agent";
+  const full = prefix + accent;
+  const charsToShow = Math.min(Math.floor(frame * 1.2), full.length);
+  const visiblePrefix = full.slice(0, Math.min(charsToShow, prefix.length));
+  const visibleAccent = charsToShow > prefix.length ? accent.slice(0, charsToShow - prefix.length) : "";
+
+  return (
+    <AbsoluteFill
+      style={{
+        backgroundColor: "#1a1b1f",
+        fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {/* Fixed position container so logo doesn't move */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        {/* Logo */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 24,
+            marginBottom: 56,
+            fontFamily: fonts.mono,
+          }}
+        >
+          <span style={{ fontSize: 80, fontWeight: "bold" }}>
+            <span style={{ color: theme.fgBright }}>agent</span>
+            <span style={{ color: theme.green, textShadow: `0 0 40px ${theme.green}50, 0 0 80px ${theme.green}25` }}>crumbs</span>
+          </span>
+          <span style={{ fontSize: 42, color: theme.comment }}>by</span>
+          <span style={{ fontSize: 42, color: theme.comment, display: "flex", alignItems: "center", gap: 12 }}>
+            <svg width="36" height="36" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fillRule="evenodd" clipRule="evenodd" d="M41.6889 52.2795L60.4195 20L106.839 100H14L32.7305 67.7195L45.9801 75.3312L40.5003 84.7756H80.3387L60.4195 50.4478L54.9396 59.8922L41.6889 52.2795Z" fill="#A8FF53"/>
+            </svg>
+            Trigger.dev
+          </span>
+        </div>
+
+        {/* Headline — fixed height so it doesn't push logo when typing */}
+        <div
+          style={{
+            fontSize: 72,
+            fontWeight: 800,
+            color: theme.fgBright,
+            textAlign: "center",
+            whiteSpace: "nowrap",
+            height: 86,
+          }}
+        >
+          {visiblePrefix}<span style={{ color: theme.green, textShadow: `0 0 30px ${theme.green}60, 0 0 60px ${theme.green}30` }}>{visibleAccent}</span>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
 
 // ── Spinner component ───────────────────────────────────────────────
 const Spinner: React.FC<{ frame: number; startFrame: number; verb: string }> = ({ frame, startFrame, verb }) => {
@@ -128,7 +207,7 @@ const AllContent: React.FC = () => {
   const inputText = isTyping ? userMessage.slice(0, typedChars) : "";
 
   return (
-    <ClaudeCodeShell scrollY={scrollY} showInput inputText={inputText}>
+    <ClaudeCodeShell scrollY={scrollY} showInput inputText={inputText} frame={frame}>
       {/* ── User prompt (appears after submit) ── */}
       {frame >= T.userSubmit && (
         <div style={{ marginBottom: 16 }}>
@@ -246,11 +325,16 @@ const AllContent: React.FC = () => {
               const lineFrame = T.crumbStart + i * T.crumbInterval;
               if (frame < lineFrame) return null;
               const isError = line.type === "scope:error";
+              // Error lines flash bright red for 4 frames then settle
+              const framesShown = frame - lineFrame;
+              const errorBg = isError
+                ? framesShown < 2 ? "#F8514940" : framesShown < 4 ? "#F8514928" : "#F8514915"
+                : "transparent";
               return (
                 <div
                   key={i}
                   style={{
-                    backgroundColor: isError ? "#F8514915" : "transparent",
+                    backgroundColor: errorBg,
                     borderRadius: 2,
                     padding: isError ? "0 4px" : 0,
                   }}
@@ -342,6 +426,37 @@ const AllContent: React.FC = () => {
   );
 };
 
+// ── Fade through black transition ────────────────────────────────────
+const FADE_FRAMES = 12;
+
+const FadeOut: React.FC = () => {
+  const frame = useCurrentFrame();
+  const opacity = interpolate(frame, [0, FADE_FRAMES], [0, 1], { extrapolateRight: "clamp" });
+  return (
+    <AbsoluteFill style={{ backgroundColor: `rgba(0, 0, 0, ${opacity})`, zIndex: 100 }} />
+  );
+};
+
+const FadeIn: React.FC = () => {
+  const frame = useCurrentFrame();
+  const opacity = interpolate(frame, [0, FADE_FRAMES], [1, 0], { extrapolateRight: "clamp" });
+  if (opacity <= 0) return null;
+  return (
+    <AbsoluteFill style={{ backgroundColor: `rgba(0, 0, 0, ${opacity})`, zIndex: 100 }} />
+  );
+};
+
+// ── Vignette overlay ────────────────────────────────────────────────
+const Vignette: React.FC = () => (
+  <AbsoluteFill
+    style={{
+      background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)",
+      zIndex: 50,
+      pointerEvents: "none",
+    }}
+  />
+);
+
 export const AgentCrumbsDemo: React.FC = () => {
   return (
     <AbsoluteFill
@@ -350,7 +465,30 @@ export const AgentCrumbsDemo: React.FC = () => {
         fontFamily: fonts.mono,
       }}
     >
-      <AllContent />
+      {/* Intro card */}
+      <Sequence durationInFrames={INTRO_FRAMES}>
+        <Intro />
+      </Sequence>
+
+      {/* Fade out end of intro */}
+      <Sequence from={INTRO_FRAMES - FADE_FRAMES} durationInFrames={FADE_FRAMES}>
+        <FadeOut />
+      </Sequence>
+
+      {/* Fade in start of terminal */}
+      <Sequence from={INTRO_FRAMES} durationInFrames={FADE_FRAMES}>
+        <FadeIn />
+      </Sequence>
+
+      {/* Terminal session */}
+      <Sequence from={INTRO_FRAMES}>
+        <AllContent />
+      </Sequence>
+
+      {/* Vignette over everything in terminal session */}
+      <Sequence from={INTRO_FRAMES}>
+        <Vignette />
+      </Sequence>
     </AbsoluteFill>
   );
 };
