@@ -1,0 +1,21 @@
+{
+  "name": "agentcrumbs-sizzle-reel",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render AgentCrumbsDemo out/agentcrumbs-demo.mp4",
+    "render:gif": "remotion render AgentCrumbsDemo out/agentcrumbs-demo.gif"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.434",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "4.0.434"
+  },
+  "devDependencies": {
+    "@remotion/eslint-config": "4.0.434",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}
