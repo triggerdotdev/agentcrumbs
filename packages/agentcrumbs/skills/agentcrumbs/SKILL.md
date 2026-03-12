@@ -127,12 +127,24 @@ Run `agentcrumbs <command> --help` for detailed options on any command.
 
 ## Enable tracing
 
+**Node.js:** Set the `AGENTCRUMBS` environment variable:
+
 ```bash
 AGENTCRUMBS=1 node app.js              # Enable all namespaces
 AGENTCRUMBS='{"ns":"auth-*"}' node app.js  # Filter by namespace
 ```
 
-When `AGENTCRUMBS` is not set, `trail()` returns a frozen noop. No conditionals, no overhead.
+**Browser:** Use `configure()` instead (no env vars in browsers):
+
+```typescript
+import { configure, trail } from "agentcrumbs"; // @crumbs
+configure("*"); // @crumbs — enable all namespaces
+const crumb = trail("ui"); // @crumbs
+```
+
+Bundlers (Vite, webpack, esbuild, Next.js) auto-resolve to the browser build. Same import path.
+
+When tracing is not enabled, `trail()` returns a frozen noop. No conditionals, no overhead.
 
 ## App isolation
 
@@ -156,7 +168,8 @@ agentcrumbs stats --all-apps     # Per-app statistics
 
 1. **Over-filtering queries** — Do NOT add `--ns` or `--match` filters to narrow results. Use `--limit` and `--cursor` to paginate instead. Filtering to one namespace hides cross-service bugs. If there are too many results, narrow the time window or reduce `--limit`, not the namespaces.
 2. **Missing markers** — Every crumb line needs `// @crumbs` or a `#region @crumbs` block. Without them, `strip` can't clean up.
-3. **Creating trail() in hot paths** — `trail()` parses the env var each call. Create once at module scope, use `child()` for per-request context.
+3. **Creating trail() in hot paths** — `trail()` parses config each call. Create once at module scope, use `child()` for per-request context.
+4. **Forgetting configure() in the browser** — In browser apps, call `configure("*")` before any `trail()` calls. Without it, all namespaces are disabled.
 4. **No collector running** — Without `agentcrumbs collect`, crumbs go to stderr only and can't be queried. Start the collector before reproducing issues.
 
 ## Further discovery

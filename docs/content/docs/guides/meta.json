@@ -1,4 +1,4 @@
 {
   "title": "Guides",
-  "pages": ["node-modules", "multi-service", "pr-reviewers", "cross-language"]
+  "pages": ["browser", "node-modules", "multi-service", "pr-reviewers", "cross-language"]
 }

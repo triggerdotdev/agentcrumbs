@@ -47,7 +47,7 @@ Returns a `TrailFn`, a callable function with additional methods:
 When a namespace is disabled, `trail()` returns a pre-built frozen noop function. There is no `if (enabled)` check on every call. The function itself IS the noop.
 
 ```typescript
-// When AGENTCRUMBS is unset:
+// When tracing is not enabled:
 const crumb = trail("my-service");  // returns frozen NOOP
 crumb("msg", { data });              // empty function, returns undefined
 crumb.scope("op", fn);               // calls fn() directly

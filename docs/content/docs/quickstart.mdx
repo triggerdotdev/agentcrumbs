@@ -98,9 +98,25 @@ agentcrumbs strip
 agentcrumbs strip --check
 ```
 
+## Browser apps
+
+agentcrumbs works in the browser with the same import. Use `configure()` instead of the env var:
+
+```typescript
+import { configure, trail } from "agentcrumbs"; // @crumbs
+
+configure("*"); // @crumbs
+const crumb = trail("ui"); // @crumbs
+
+crumb("button clicked", { id: "submit" }); // @crumbs
+```
+
+Bundlers that support the `"browser"` export condition (Vite, webpack, esbuild, Next.js) resolve to the browser build automatically. See the [browser guide](/guides/browser) for details.
+
 ## Next steps
 
 - [Skills](/skills): how agents learn to use agentcrumbs from the package itself
 - [Workflow](/workflow): how crumbs fit into the branch lifecycle
 - [API reference](/api/trail): full API docs
 - [CLI reference](/cli/collect): collector, tail, query, strip
+- [Browser guide](/guides/browser): using agentcrumbs in browser apps

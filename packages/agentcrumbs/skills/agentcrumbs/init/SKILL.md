@@ -76,6 +76,13 @@ This is what gets stamped on every crumb as the `app` field.
 If the repo is a monorepo, use the root package name (not individual
 workspace packages — those become namespaces, not apps).
 
+### Browser apps
+
+If the project has browser-side code (React, Vue, Svelte, etc.), include
+browser-facing namespaces in the catalog. The same `"agentcrumbs"` import
+works in the browser — bundlers auto-resolve to the browser build. Note
+in the config that browser apps use `configure()` instead of the env var.
+
 ### What to capture for each namespace
 
 For each namespace, record:
@@ -141,7 +148,8 @@ production.
 ### CLI
 
 ```bash
-AGENTCRUMBS=1 node app.js              # enable tracing
+AGENTCRUMBS=1 node app.js              # enable tracing (Node.js)
+configure("*")                          # enable tracing (browser — call before trail())
 agentcrumbs collect                     # start collector
 agentcrumbs tail                        # live tail (scoped to this app)
 agentcrumbs query --since 5m            # query recent crumbs (all namespaces)

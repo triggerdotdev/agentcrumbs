@@ -9,7 +9,11 @@
   "exclude": [
     "../src/__tests__/**/*",
     "../src/**/*.mts",
-    "../src/package.json"
+    "../src/package.json",
+    "../src/context-browser.mts",
+    "../src/env-browser.mts",
+    "../src/sinks/console-browser.mts",
+    "../src/trail-browser.mts"
   ],
   "compilerOptions": {
     "outDir": "../.tshy-build/commonjs"

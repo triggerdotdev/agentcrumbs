@@ -31,6 +31,7 @@ Service C ──┘  (fire & forget)               └── ~/.agentcrumbs/<app
 - **Strip before merge.** `agentcrumbs strip` removes all `// @crumbs` lines and `#region @crumbs` blocks. Clean diffs, no debug code on main.
 - **HTTP collector.** `agentcrumbs collect` receives crumbs from all services via fire-and-forget HTTP. Tail, query, and replay from the CLI.
 - **Works with any agent.** Claude Code, Cursor, Copilot, Aider, custom agents. If the agent can write code, it can write crumbs.
+- **Works in the browser.** Same import path. Bundlers auto-resolve to the browser build. Use `configure()` instead of the env var. See the [browser guide](/guides/browser).
 - **Ships with agent skills.** Built on [@tanstack/intent](https://tanstack.com/blog/from-docs-to-agents). Install the package, tell your agent to run `npx @tanstack/intent install`, and it learns how to use crumbs from the package itself. No stale training data.
 
 ## Install

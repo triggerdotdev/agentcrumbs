@@ -1,56 +1,84 @@
-import fs from "node:fs";
-import path from "node:path";
 import type { AgentCrumbsConfig } from "./types.js";
 
 const DEFAULT_PORT = 8374;
 
-type ParsedConfig = {
-  enabled: false;
-} | {
-  enabled: true;
-  app?: string;
-  includes: RegExp[];
-  excludes: RegExp[];
-  port: number;
-  format: "pretty" | "json";
-};
+type ParsedConfig =
+  | { enabled: false }
+  | {
+      enabled: true;
+      app?: string;
+      includes: RegExp[];
+      excludes: RegExp[];
+      port: number;
+      format: "pretty" | "json";
+    };
 
 let cachedConfig: ParsedConfig | undefined;
 let cachedApp: string | undefined;
 
+declare const globalThis: {
+  __AGENTCRUMBS__?: string | AgentCrumbsConfig;
+  __AGENTCRUMBS_APP__?: string;
+};
+
 function namespaceToRegex(pattern: string): RegExp {
-  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*?");
+  const escaped = pattern
+    .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
+    .replace(/\*/g, ".*?");
   return new RegExp(`^${escaped}$`);
+}
+
+/**
+ * Configure agentcrumbs in the browser.
+ *
+ * @example
+ *   configure("*")            // enable all namespaces
+ *   configure("myapp:*")      // enable namespaces matching pattern
+ *   configure({ ns: "*", app: "my-app", format: "pretty" })
+ */
+export function configure(config: AgentCrumbsConfig | string): void {
+  cachedConfig = undefined;
+  cachedApp = undefined;
+
+  if (typeof config === "string") {
+    (globalThis as Record<string, unknown>).__AGENTCRUMBS__ = config;
+  } else {
+    (globalThis as Record<string, unknown>).__AGENTCRUMBS__ = config;
+  }
 }
 
 export function parseConfig(): ParsedConfig {
   if (cachedConfig !== undefined) return cachedConfig;
 
-  const raw = process.env.AGENTCRUMBS;
+  const raw = globalThis.__AGENTCRUMBS__;
   if (!raw) {
     cachedConfig = { enabled: false };
     return cachedConfig;
   }
 
-  // Shorthand: "1", "*", "true" → enable all
-  if (raw === "1" || raw === "*" || raw === "true") {
-    cachedConfig = {
-      enabled: true,
-      includes: [/^.*$/],
-      excludes: [],
-      port: DEFAULT_PORT,
-      format: "pretty",
-    };
-    return cachedConfig;
-  }
-
-  // Try parsing as JSON config object
   let config: AgentCrumbsConfig;
-  try {
-    config = JSON.parse(raw) as AgentCrumbsConfig;
-  } catch {
-    // If not valid JSON, treat the raw string as a namespace filter
-    config = { ns: raw };
+
+  if (typeof raw === "object") {
+    config = raw;
+  } else {
+    // Shorthand: "1", "*", "true" → enable all
+    if (raw === "1" || raw === "*" || raw === "true") {
+      cachedConfig = {
+        enabled: true,
+        includes: [/^.*$/],
+        excludes: [],
+        port: DEFAULT_PORT,
+        format: "pretty",
+      };
+      return cachedConfig;
+    }
+
+    // Try parsing as JSON config object
+    try {
+      config = JSON.parse(raw) as AgentCrumbsConfig;
+    } catch {
+      config = { ns: raw };
+    }
   }
 
   const parts = config.ns.split(/[\s,]+/).filter(Boolean);
@@ -65,7 +93,6 @@ export function parseConfig(): ParsedConfig {
     }
   }
 
-  // If no includes specified, nothing matches
   if (includes.length === 0) {
     cachedConfig = { enabled: false };
     return cachedConfig;
@@ -107,55 +134,27 @@ export function getFormat(): "pretty" | "json" {
 
 /**
  * Resolve the app name. Priority:
- * 1. `app` field from AGENTCRUMBS JSON config
- * 2. AGENTCRUMBS_APP env var
- * 3. Nearest package.json `name` field (walk up from cwd)
- * 4. Fallback: "unknown"
+ * 1. `app` field from configure() config
+ * 2. `globalThis.__AGENTCRUMBS_APP__`
+ * 3. Fallback: "browser"
  */
 export function getApp(): string {
   if (cachedApp !== undefined) return cachedApp;
 
-  // 1. From parsed AGENTCRUMBS config
   const config = parseConfig();
   if (config.enabled && config.app) {
     cachedApp = config.app;
     return cachedApp;
   }
 
-  // 2. From dedicated env var
-  const envApp = process.env.AGENTCRUMBS_APP;
-  if (envApp) {
-    cachedApp = envApp;
+  const globalApp = globalThis.__AGENTCRUMBS_APP__;
+  if (globalApp) {
+    cachedApp = globalApp;
     return cachedApp;
   }
 
-  // 3. Auto-detect from nearest package.json
-  cachedApp = detectAppFromPackageJson() ?? "unknown";
+  cachedApp = "browser";
   return cachedApp;
-}
-
-function detectAppFromPackageJson(): string | undefined {
-  let dir = process.cwd();
-
-  for (let i = 0; i < 50; i++) {
-    const pkgPath = path.join(dir, "package.json");
-    try {
-      const content = fs.readFileSync(pkgPath, "utf-8");
-      const pkg = JSON.parse(content) as { name?: string };
-      if (pkg.name) {
-        // Strip @scope/ prefix
-        return pkg.name.replace(/^@[^/]+\//, "");
-      }
-    } catch {
-      // no package.json here, keep walking
-    }
-
-    const parent = path.dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-
-  return undefined;
 }
 
 /** Reset cached config — useful for tests */
@@ -166,11 +165,4 @@ export function resetConfig(): void {
 /** Reset cached app — useful for tests */
 export function resetApp(): void {
   cachedApp = undefined;
-}
-
-/** No-op in Node.js — use AGENTCRUMBS env var instead. */
-export function configure(
-  _config: AgentCrumbsConfig | string,
-): void {
-  // In Node.js, use AGENTCRUMBS env var instead
 }

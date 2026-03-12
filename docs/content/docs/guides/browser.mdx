@@ -1,0 +1,96 @@
+---
+title: "Browser"
+description: "Use agentcrumbs in browser apps with the same import path"
+---
+
+agentcrumbs works in the browser with the same `"agentcrumbs"` import. Bundlers that respect the `"browser"` export condition (Vite, webpack, esbuild, Next.js) automatically resolve to the browser build.
+
+## Enable tracing
+
+Browsers don't have environment variables. Use `configure()` instead:
+
+```typescript
+import { configure, trail } from "agentcrumbs"; // @crumbs
+
+configure("*"); // @crumbs — enable all namespaces
+
+const crumb = trail("ui"); // @crumbs
+```
+
+`configure()` accepts the same values as the `AGENTCRUMBS` env var:
+
+```typescript
+// Enable all
+configure("*"); // @crumbs
+
+// Namespace filter
+configure("ui-*,api-*"); // @crumbs
+
+// Full config object
+configure({ ns: "ui-*", app: "my-app", format: "pretty" }); // @crumbs
+```
+
+Call `configure()` before any `trail()` calls. A good place is your app's entry point.
+
+### Declarative fallback
+
+You can also set config on `globalThis` before importing agentcrumbs:
+
+```html
+<script>
+  window.__AGENTCRUMBS__ = "*";
+  // or: window.__AGENTCRUMBS__ = { ns: "ui-*", app: "my-app" };
+  // or set just the app name: window.__AGENTCRUMBS_APP__ = "my-app";
+</script>
+```
+
+## App name
+
+In the browser, the app name is resolved in this order:
+1. `app` field from `configure()` config
+2. `globalThis.__AGENTCRUMBS_APP__`
+3. Fallback: `"browser"`
+
+## Console output
+
+In the browser, crumbs are written to `console.debug()` with CSS styling:
+
+- Namespace labels are color-coded
+- Scope enter/exit use `console.groupCollapsed()` / `console.groupEnd()` for collapsible nesting
+- Data objects are passed as additional arguments so DevTools renders them interactively
+
+When `format: "json"` is set, crumbs are written as JSON strings via `console.debug()`.
+
+## Collector support
+
+The browser build includes the HTTP sink, so crumbs are sent to the collector just like in Node.js. Start `agentcrumbs collect` on your dev machine and crumbs from both your server and browser flow to the same place.
+
+```bash
+# Terminal: Start collector
+agentcrumbs collect
+
+# Browser crumbs + server crumbs appear together
+agentcrumbs tail --all-apps
+```
+
+The browser defaults to `http://localhost:8374/crumb`. Make sure CORS allows it, or the HTTP sink silently fails (crumbs still appear in the DevTools console).
+
+## Differences from Node.js
+
+| | Node.js | Browser |
+|---|---------|---------|
+| **Config** | `AGENTCRUMBS` env var | `configure()` call |
+| **Console output** | ANSI-colored stderr | CSS-styled DevTools console |
+| **Async context** | `AsyncLocalStorage` | Sync stack (single-threaded) |
+| **Process ID** | `process.pid` | `0` |
+| **Session file** | Reads `/tmp/agentcrumbs.session` | Skipped |
+| **UUID** | `node:crypto` | Web Crypto API |
+| **App fallback** | Nearest `package.json` name | `"browser"` |
+
+### Context isolation
+
+The browser uses a sync stack instead of `AsyncLocalStorage`. This works for all linear async flows. However, concurrent branches in `Promise.all` won't isolate context from each other. This is acceptable for debugging — just be aware that nested scopes inside `Promise.all` may share context.
+
+## configure() in Node.js
+
+`configure()` is exported from both builds so your code compiles in both environments. In Node.js it's a no-op — use the `AGENTCRUMBS` env var instead.
