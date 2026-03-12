@@ -90,6 +90,7 @@ All methods are documented in detail at [agentcrumbs.dev/docs/api](https://agent
 
 | Method | Purpose |
 | --- | --- |
+| `configure(config)` | Enable tracing in the browser (no-op in Node.js) |
 | `trail(namespace)` | Create a trail function for a namespace |
 | `crumb(msg, data?, options?)` | Drop a crumb with message and optional data |
 | `crumb.scope(name, fn)` | Wrap a function with entry/exit/error tracking |
@@ -104,9 +105,16 @@ All methods are documented in detail at [agentcrumbs.dev/docs/api](https://agent
 
 Mark crumb lines with `// @crumbs` (single line) or `// #region @crumbs` / `// #endregion @crumbs` (block) so they can be stripped before merge. See the [markers docs](https://agentcrumbs.dev/docs/markers) for details and examples.
 
-## Environment variable
+## Configuration
 
-Everything is controlled by a single `AGENTCRUMBS` environment variable.
+In Node.js, everything is controlled by a single `AGENTCRUMBS` environment variable. In the browser, use `configure()`:
+
+```typescript
+import { configure } from "agentcrumbs"; // @crumbs
+configure("*"); // @crumbs — enable all namespaces
+```
+
+### Environment variable (Node.js)
 
 | Value | Effect |
 | --- | --- |
@@ -173,9 +181,10 @@ curl -X POST http://localhost:8374/crumb \
 
 ## Runtime compatibility
 
-Zero runtime dependencies. Node.js built-in modules only: `node:http`, `node:async_hooks`, `node:crypto`, `node:fs`, `node:util`.
+Zero runtime dependencies.
 
-Verified compatible with **Node.js 18+** and **Bun**.
+- **Node.js 18+** and **Bun** — uses `node:async_hooks`, `node:crypto`, `node:fs`, `node:util`
+- **Browsers** — Vite, webpack, esbuild, Next.js auto-resolve to the browser build via the `"browser"` export condition. Same `"agentcrumbs"` import path. Use `configure()` instead of the env var to enable tracing. See the [browser guide](https://agentcrumbs.dev/docs/guides/browser).
 
 ## Docs
 

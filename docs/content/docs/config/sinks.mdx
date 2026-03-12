@@ -3,7 +3,7 @@ title: "Sinks"
 description: "Configure where crumbs are sent"
 ---
 
-By default, crumbs are sent via HTTP to the collector and also printed to stderr. You can add custom sinks or replace the defaults.
+By default, crumbs are sent via HTTP to the collector and also printed to the console. In Node.js, output goes to stderr with ANSI colors. In the browser, output goes to `console.debug()` with CSS styling. You can add custom sinks or replace the defaults.
 
 ## Custom sink
 
@@ -32,7 +32,10 @@ import { HttpSink } from "agentcrumbs";
 
 ### ConsoleSink
 
-Pretty-printed stderr output. Added automatically when `AGENTCRUMBS` is set.
+Pretty-printed console output. Added automatically when tracing is enabled.
+
+- **Node.js**: ANSI-colored output to stderr
+- **Browser**: CSS-styled output via `console.debug()`, with `console.groupCollapsed()` for scopes and interactive object rendering in DevTools
 
 ```typescript
 import { ConsoleSink } from "agentcrumbs";
