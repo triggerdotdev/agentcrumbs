@@ -1,5 +1,6 @@
 export { trail } from "./trail.js";
 export { addSink, removeSink } from "./trail.js";
+export { configure } from "./env.js";
 export { NOOP } from "./noop.js";
 export { MemorySink } from "./sinks/memory.js";
 export { ConsoleSink } from "./sinks/console.js";
