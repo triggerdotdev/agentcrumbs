@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["agentcrumbs-docs"]
+  "ignore": ["agentcrumbs-docs", "papertrail", "agentcrumbs-sizzle-reel"]
 }
